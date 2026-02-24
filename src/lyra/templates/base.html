@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<script src="{{ url_for('static', filename='external/plotly/plotly-3.0.1.min.js') }}"></script>
+	<link href="{{ url_for('static', filename='external/fontawesome/css/fontawesome.css') }}" rel="stylesheet"/>
+	<link href="{{ url_for('static', filename='external/fontawesome/css/solid.css') }}" rel="stylesheet"/>
+	<link href="{{ url_for('static', filename='external/fontawesome/css/brands.css') }}" rel="stylesheet"/>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+	{% block head %}{% endblock %}
+</head>
+<body>
+	<div id="container">
+		<nav id="nav-bar">
+			<div class="color-bar"></div>
+			<div id="nav-bar-text">
+				<h1>Lyra -- Spectral Explorer v0.1.0</h1>
+			</div>
+		</nav>
+		<div id="content">{% block content %}{% endblock %}</div>
+	</div>
+	<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+	{% block script %}{% endblock %}
+</body>
+</html>
