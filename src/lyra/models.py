@@ -1,7 +1,6 @@
 import pathlib
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import toml
-from typing import List
 
 
 COLLECTION_DIR = pathlib.Path(__file__).resolve().parent.parent.parent.joinpath('collections')
@@ -14,9 +13,16 @@ class Component(BaseModel):
 	color: str
 
 
+class Feature(BaseModel):
+	name: str
+	wave: float
+	color: str
+
+
 class Collection(BaseModel):
 	name: str
-	components: List[Component]
+	components: list[Component] = Field(default_factory=list)
+	features: list[Feature] = Field(default_factory=list)
 
 
 	@classmethod

@@ -1,0 +1,45 @@
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+    margin-top: 20vh;
+    /*margin: 25vh 25vw;*/
+    width: 33vw;
+    padding: 30px;
+    background: var(--dark-blue);
+    color: var(--pale-silver);
+    /*border-radius: 50px;*/
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    border-bottom: 0;
+    border-image: var(--rgradient) 1 1 0 0 / 5px 5px 0 0 stretch;
+
+    .modal-label {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 100;
+    }
+
+
+    #collections-list {
+        display: flex;
+        padding: 0;
+        flex-direction: column;
+        list-style-type: none;
+        justify-content: center;
+        align-items: center;
+        width: 98%;
+    }
+
+    #collection-info {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+        grid-template-rows: 1fr 1fr;
+        /*flex-direction: column;*/
+        /*justify-content: center;*/
+        /*align-items: center;*/
+        margin: 10px 10px;
+    }
+}

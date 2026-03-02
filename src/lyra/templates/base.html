@@ -14,12 +14,12 @@
 		<nav id="nav-bar">
 			<div class="color-bar"></div>
 			<div id="nav-bar-text">
-				<h1>Lyra -- Spectral Explorer v0.1.0</h1>
+				<h1>Lyra: Spectral Explorer v0.1.0</h1>
 			</div>
 		</nav>
 		<div id="content">{% block content %}{% endblock %}</div>
 	</div>
-	<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+	<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 	{% block script %}{% endblock %}
 </body>
 </html>

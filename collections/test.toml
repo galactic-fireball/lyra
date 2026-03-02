@@ -1,2 +1,13 @@
 name = "FIRST"
-components = [{"data"="black"},{"model"="red"}]
+
+
+components = [
+    { name = "data", color = "black" },
+    { name = "model", color = "red" },
+]
+
+
+features = [
+    { name = "NeV_3425", wave = 3425.881, color = "red" },
+    { name = "MgII_2799", wave = 2799.117, color = "black" },
+]
