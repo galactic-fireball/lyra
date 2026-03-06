@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/collections.css') }}"/>
+{% endblock %}
+
+{% block content %}
+	<div data-component="collection-creator">
+		<div class="modal-container">
+			<div class="modal-label">New Collection:</div>
+			<div id="collection-info">
+				<label for="collection-name" class="form-item">Name:</label>
+				<input id="collection-name" class="form-item"></input>
+				<label for="collection-config" class="form-item">Config:</label>
+				<select id="collection-config" class="form-item"></select>
+			</div>
+			<div id="collection-submit-button" class="button-typeA">Submit</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

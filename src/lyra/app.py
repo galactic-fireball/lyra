@@ -1,7 +1,16 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, jsonify, redirect, url_for
 
 def init_app():
 	app = Flask(__name__)
+
+	@app.route('/api/routes')
+	def get_routes():
+		routes = {}
+		for rule in app.url_map.iter_rules():
+			if 'GET' not in rule.methods:
+				continue
+			routes[rule.endpoint] = rule.rule
+		return jsonify(routes)
 
 	from lyra.views.collections import collections
 	app.register_blueprint(collections, url_prefix='/collections')

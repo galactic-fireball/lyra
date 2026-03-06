@@ -1,0 +1,17 @@
+name = "Simple"
+description = "Simple schema template"
+
+components = [
+    { name = "model", color = "red" },
+]
+
+
+features = []
+
+
+actions = [
+    { name = "mark", label = "Mark", data_id = "mark", tag_list = [
+        { name = "unmarked", label = "Unmarked", hotkey = "0", value = 0 },
+        { name = "marked", label = "Marked", hotkey = "1", value = 1 }
+    ]}
+]

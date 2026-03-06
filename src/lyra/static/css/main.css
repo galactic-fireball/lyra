@@ -46,6 +46,10 @@ body {
     background-color: var(--rblue);
 }
 
+.form-item {
+    margin: 10px;
+    height: 2em;
+}
 
 /* BASE CONTAINER AND HEADER */
 

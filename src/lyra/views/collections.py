@@ -7,3 +7,8 @@ collections = Blueprint('collections', __name__, static_folder='static', templat
 @collections.route('/')
 def chooser():
 	return render_template('collection_chooser.html')
+
+
+@collections.route('/collection-creator')
+def collection_creator():
+	return render_template('collection_creator.html')

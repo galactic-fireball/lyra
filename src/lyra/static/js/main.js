@@ -1,15 +1,12 @@
-import { COMPONENT_REGISTRY } from './components/registry.js'
+import { loadRoutes } from './api.js';
+
+import './components/collections.js';
+import { initComponents } from './components/registry.js'
 
 
 function init() {
-	document.querySelectorAll('[data-component]').forEach(el => {
-		const name = el.dataset.component;
-		const initFunc = COMPONENT_REGISTRY[name];
-		if (initFunc) {
-			initFunc();
-		}
-	});
+	loadRoutes();
+	initComponents();
 }
-
 
 document.addEventListener('DOMContentLoaded', init);
