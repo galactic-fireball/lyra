@@ -1,11 +1,11 @@
-import { loadRoutes } from './api.js';
+import { loadRoutes } from './router.js';
 
 import './components/collections.js';
 import { initComponents } from './components/registry.js'
 
 
-function init() {
-	loadRoutes();
+async function init() {
+	await loadRoutes();
 	initComponents();
 }
 

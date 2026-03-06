@@ -1,51 +1,24 @@
 import { log } from './utils.js';
+import { urlFor } from './router.js';
 
-let ROUTES = null
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
-export async function loadRoutes() {
-	log('loadRoutes');
-	const response = await fetch('/api/routes');
-	ROUTES = await response.json();
-	log(ROUTES);
+
+async function fetchJSON(url, opts={}) {
+	const res = await fetch(url, opts);
+	if (!res.ok) {
+		const text = await res.text();
+		log('fetch failed: ' + text);
+		return null
+	}
+
+	return res.json();
 }
 
 
-function urlFor(endpoint, params) {
-	log('urlFor')
+export async function getSchemas() {
+	log('getSchemas');
 
-	if (!ROUTES) {
-		log('routes not initialized');
-		return null;
-	}
-
-	let url = ROUTES[endpoint];
-	if (!url) {
-		log('url unavailable');
-		return null;
-	}
-
-	for (const [key,value] of Object.entries(params)) {
-		url = url.replace('{'+key+'}', value);
-	}
-
-	if (url.includes('{')) {
-		log('Missing parameters for ' + endpoint);
-		return null;
-	}
-
-	return url;
-}
-
-
-export function navigate(endpoint, params={}) {
-	log('navigate');
-	window.location.href = urlFor(endpoint, params);
-}
-
-
-// COLLECTIONS
-
-export function gotoCollectionCreator() {
-	log('gotoCollectionCreator');
-	navigate('collections.collection_creator');
+	let url = urlFor('collections.get_schemas');
+	return await fetchJSON(url);
 }

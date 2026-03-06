@@ -3,7 +3,7 @@ import numpy.typing as npt
 import pathlib
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, PlainSerializer
 import toml
-from typing import Annotated, Any
+from typing import Annotated, Any, ClassVar
 
 
 COLLECTION_DIR = pathlib.Path(__file__).resolve().parent.parent.parent.joinpath('collections')
@@ -61,6 +61,16 @@ class Schema(BaseModel):
 	components: list[Component] = Field(default_factory=list, description='Expected components in the schema.')
 	features: list[Feature] = Field(default_factory=list, description='Features to track within the schema.')
 	actions: list[Action] = Field(default_factory=list, description='Available actions.')
+
+	schemas: ClassVar[dict] = {}
+
+	@classmethod
+	def get_schemas(cls):
+		if len(Schema.schemas) == 0:
+			for schema_file in SCHEMA_DIR.glob('*'):
+				schema = cls(**toml.load(schema_file))
+				Schema.schemas[schema.name] = schema
+		return Schema.schemas
 
 
 class Collection(BaseModel):
