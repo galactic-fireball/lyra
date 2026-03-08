@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 import pathlib
-from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, PlainSerializer
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator, PlainSerializer
 import toml
 from typing import Annotated, Any, ClassVar
 
@@ -84,12 +84,52 @@ def set_schema(value: Schema | str) -> Schema:
 	return Schema.by_name(value)
 
 
+
 class Collection(BaseModel):
 	name: str = Field(None, description='The name of the collection.')
+	slug: str = Field(None, description='Slug label used in URLs to represent this Collection.')
 	schema: Annotated[Schema | str, AfterValidator(set_schema)] = Field(None, description='The schema used within the collection.')
-	description: str = Field(None, description='The description of the collection')
-	spectra: list[str] = Field(default_factory=list, description='The names of all spectral items in the collection')
-	data_dir: str = Field(None, description='The directory containing the spectrum files for this collection')
+	description: str = Field(None, description='The description of the collection.')
+	spectra: list[str] = Field(default_factory=list, description='The names of all spectral items in the collection.')
+	data_dir: pathlib.Path | str = Field(None, description='The directory containing the spectrum files for this collection.')
+	metadata: list[str] = Field(default_factory=list, description='The expected keys of the metadata field for each Spectrum in the Colleciton.')
+
+	collections: ClassVar[dict] = {}
+
+	@model_validator(mode='after')
+	def set_slug(self):
+		self.slug = self.name.replace(' ', '-')
+		return self
+
+
+	@model_validator(mode='after')
+	def setup(self):
+		# TODO: check if data_dir exists
+
+		col_dir = COLLECTION_DIR.joinpath(self.name)
+		col_dir.mkdir(parents=True, exist_ok=True)
+
+		config_file = col_dir.joinpath(DEFAULT_CONFIG_NAME)
+		if not config_file.exists():
+			with open(config_file, 'w') as f:
+				f.write(toml.dumps(self.model_dump()))
+
+		if isinstance(self.data_dir, str):
+			self.data_dir = pathlib.Path(self.data_dir)
+
+		# TODO: check for collection with this name already exists
+		Collection.collections[self.name] = self
+		return self
+
+
+	@staticmethod
+	def get_collections():
+		if len(Collection.collections) == 0:
+			for col_file in COLLECTION_DIR.glob('*'):
+				col = cls(**toml.load(col_file))
+				Collection.collections[col.name] = col
+		return Collection.collections
+
 
 	@classmethod
 	def from_name(cls, name):
@@ -97,15 +137,16 @@ class Collection(BaseModel):
 		if not config_file.exists():
 			raise Exception('Not found: %s'%str(col_dir))
 
-		return cls(**toml.load(config_file))
+		col_dict = toml.load(config_file)
+		print(col_dict)
+		return cls(**col_dict)
 
 
-	@staticmethod
-	def get_collections():
-		print(str(COLLECTION_DIR))
-		cols = [f.stem for f in COLLECTION_DIR.glob('*')]
-		print(cols)
-		return cols
+	def get_spectra(self):
+		if len(self.spectra) == 0:
+			self.spectra = [f.stem for f in self.data_dir.glob('*')]
+		return self.spectra
+
 
 
 class Spectrum(BaseModel):

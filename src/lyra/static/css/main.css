@@ -1,16 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300&display=swap');
 
 :root {
-    --dark-primary: #0B0F1A;
-    --dark-second: #202C45;
-    --text-color: #E6EDF7;
-    --trim-color: #9FB3D9;
+    --dark-primary: #0b0f1a;
+    --dark-primary-comp: #1a160b;
+    --dark-second: #202c45;
+    --text-color: #e6edf7;
+    --text-color-subtle: rgba(230,237,247,0.2);
+    --trim-color: #9fb3d9;
+    --trim-color-subtle: rgba(159,179,217,0.2);
     --rblue: #108ab1;
     --rgreen: #06d7a0;
     --ryellow: #ffd167;
     --rorange: #f78c6a;
     --rred: #f04770;
     --rgradient: linear-gradient(141deg, var(--rblue), var(--rgreen), var(--ryellow), var(--rorange), var(--rred));
+    --table-border-radius: 8px;
 }
 
 @font-face {
@@ -73,6 +77,86 @@ input.form-item, select.form-item {
     border: 2px solid transparent;
     background: linear-gradient(var(--dark-second), var(--dark-second)) padding-box, var(--rgradient) border-box;
 }
+
+
+table {
+
+    border-spacing: 0;
+    width: 100%;
+    border-radius: var(--table-border-radius);
+    background: var(--dark-primary);
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+
+    thead th {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--trim-color);
+        color: var(--dark-primary);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
+    }
+
+    th, td {
+        border-block-width: 1px 0;
+        border-inline-width: 1px 0;
+        border: 1px solid var(--text-color-subtle);
+        padding: 14px 18px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    /* rounded corners */
+    th {
+        &:first-child { border-top-left-radius: var(--table-border-radius); }
+        &:last-child { border-top-right-radius: var(--table-border-radius); }
+    }
+
+    tr:last-child {
+        & td:first-child { border-bottom-left-radius: var(--table-border-radius); }
+        & td:last-child { border-bottom-right-radius: var(--table-border-radius); }
+    }
+
+    tr:nth-child(even) {
+        background: var(--dark-primary-comp);
+    }
+
+    tr:hover {
+        background: var(--trim-color);
+        color: var(--dark-primary);
+
+        & td a {
+            color: var(--dark-primary);
+        }
+    }
+
+    tr td a {
+        color: var(--text-color);
+        &:hover {
+            color: var(--dark-primary);
+        }
+    }
+
+    tr td input {
+        transform: scale(1.4);
+        accent-color: var(--trim-color);
+    }
+}
+
+
+#table-container {
+    margin-top:5vh;
+    margin-bottom: 10vh;
+    min-width: 75vw;
+    padding: 50px;
+    justify-self: center;
+    align-self: center;
+}
+
+
+
+
 
 
 /* LOADING OVERLAY */

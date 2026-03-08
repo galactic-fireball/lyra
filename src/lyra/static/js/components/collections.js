@@ -44,11 +44,16 @@ async function loadCollectionCreator() {
 			const source = document.querySelector('#collection-source').value;
 			const schema = document.querySelector('#collection-schema').value;
 
-			createCollection(name, desc, source, schema);
-			showLoading();
-			// TODO: open spectra viewer with new collection
+			newCollection(name, desc, source, schema);
 		});
 	}
+}
+
+
+function newCollection(name, desc, source, schema) {
+	showLoading();
+	createCollection(name, desc, source, schema)
+	// TODO: open spectra viewer with new collection
 }
 
 

@@ -21,5 +21,10 @@ def get_schemas():
 
 @collections.route('/new-collection', methods=['POST'])
 def new_collection():
-	print(request.json)
-	return jsonify({'success':'ok'})
+	new_col = Collection(**request.json)
+
+
+@collections.get('/<collection_slug>')
+def collection_table(collection_slug):
+	col = Collection.from_name(collection_slug)
+	return render_template('collection_table.html', spectra=col.get_spectra())
