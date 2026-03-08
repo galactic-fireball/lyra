@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 import pathlib
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, PlainSerializer
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, PlainSerializer
 import toml
 from typing import Annotated, Any, ClassVar
 
@@ -73,11 +73,23 @@ class Schema(BaseModel):
 		return Schema.schemas
 
 
+	@classmethod
+	def by_name(cls, name):
+		return Schema.schemas.get(name, None)
+
+
+def set_schema(value: Schema | str) -> Schema:
+	if isinstance(value, Schema):
+		return Schema
+	return Schema.by_name(value)
+
+
 class Collection(BaseModel):
 	name: str = Field(None, description='The name of the collection.')
-	schema: Schema = Field(None, description='The schema used within the collection.')
+	schema: Annotated[Schema | str, AfterValidator(set_schema)] = Field(None, description='The schema used within the collection.')
 	description: str = Field(None, description='The description of the collection')
 	spectra: list[str] = Field(default_factory=list, description='The names of all spectral items in the collection')
+	data_dir: str = Field(None, description='The directory containing the spectrum files for this collection')
 
 	@classmethod
 	def from_name(cls, name):
@@ -106,5 +118,5 @@ class Spectrum(BaseModel):
 	data: NDArray = Field(None, description='The flux array.')
 	noise: NDArray = Field(None, description='The noise array.')
 	metadata: dict = Field(default_factory=dict, description='Metadata about the spectrum to display.')
-	asdf: str = Field(None, description='The parent collection of which this spectrum belongs.')
+	collection: str = Field(None, description='The parent collection of which this spectrum belongs.')
 

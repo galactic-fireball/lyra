@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, jsonify, render_template, request
 
 from lyra.models import Collection, Schema
 
@@ -17,3 +17,9 @@ def collection_creator():
 @collections.route('/schemas')
 def get_schemas():
 	return jsonify({k:s.model_dump() for k,s in Schema.get_schemas().items()})
+
+
+@collections.route('/new-collection', methods=['POST'])
+def new_collection():
+	print(request.json)
+	return jsonify({'success':'ok'})

@@ -1,7 +1,7 @@
 // import { Collection } from '../apiTypes.ts';
-import { log } from '../utils.js';
+import { log, showLoading } from '../utils.js';
 import { gotoCollectionCreator } from '../router.js';
-import { getSchemas } from '../api.js';
+import { getSchemas, createCollection } from '../api.js';
 import { registerComponent } from './registry.js';
 
 
@@ -35,6 +35,20 @@ async function loadCollectionCreator() {
 	}
 
 	// TODO: collection-submit-button click event listener
+	const submitButton = document.querySelector('#collection-submit-button');
+	if (submitButton) {
+		submitButton.addEventListener('click', function() {
+			log('collection creator submit');
+			const name = document.querySelector('#collection-name').value;
+			const desc = document.querySelector('#collection-desc').value;
+			const source = document.querySelector('#collection-source').value;
+			const schema = document.querySelector('#collection-schema').value;
+
+			createCollection(name, desc, source, schema);
+			showLoading();
+			// TODO: open spectra viewer with new collection
+		});
+	}
 }
 
 

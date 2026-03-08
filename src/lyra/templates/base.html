@@ -10,6 +10,7 @@
 	{% block head %}{% endblock %}
 </head>
 <body>
+
 	<div id="container">
 		<nav id="nav-bar">
 			<div class="color-bar"></div>
@@ -17,8 +18,16 @@
 				<h1>Lyra: Spectral Explorer v0.1.0</h1>
 			</div>
 		</nav>
+
+		<div id="loading-overlay" class="hidden">
+			<div id="loading-dialog" class="dialog-box">
+				<div id="loading-animation"><span></span><span></span><span></span><span></span><span></span></div>
+			</div>
+		</div>
+
 		<div id="content">{% block content %}{% endblock %}</div>
 	</div>
+
 	<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 	{% block script %}{% endblock %}
 </body>

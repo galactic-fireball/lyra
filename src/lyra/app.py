@@ -7,8 +7,6 @@ def init_app():
 	def get_routes():
 		routes = {}
 		for rule in app.url_map.iter_rules():
-			if 'GET' not in rule.methods:
-				continue
 			routes[rule.endpoint] = rule.rule
 		return jsonify(routes)
 
