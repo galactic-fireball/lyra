@@ -146,12 +146,36 @@ table {
 
 
 #table-container {
-    margin-top:5vh;
+    /*margin-top:5vh;*/
     margin-bottom: 10vh;
     min-width: 75vw;
-    padding: 50px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     justify-self: center;
     align-self: center;
+
+    #table-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        margin: 20px 10px;
+        min-width: 50%;
+
+        h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 10px 0px;
+        }
+
+        p {
+            margin: 10px 0px;
+        }
+    }
 }
 
 

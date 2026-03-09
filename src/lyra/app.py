@@ -13,6 +13,9 @@ def init_app():
 	from lyra.views.collections import collections
 	app.register_blueprint(collections, url_prefix='/collections')
 
+	from lyra.views.spec_viewer import spec_viewer
+	app.register_blueprint(spec_viewer, url_prefix='/spec-viewer')
+
 	@app.route('/')
 	def index():
 		return redirect(url_for('collections.chooser'))

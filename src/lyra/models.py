@@ -58,6 +58,7 @@ class Action(BaseModel):
 class Schema(BaseModel):
 	name: str = Field(None, description='The name of the schema.')
 	description: str = Field(None, description='The description of the schema.')
+	product_fmt: str = Field(None, description='The product format expected for data using this schema.')
 	components: list[Component] = Field(default_factory=list, description='Expected components in the schema.')
 	features: list[Feature] = Field(default_factory=list, description='Features to track within the schema.')
 	actions: list[Action] = Field(default_factory=list, description='Available actions.')
@@ -106,7 +107,7 @@ class Collection(BaseModel):
 	def setup(self):
 		# TODO: check if data_dir exists
 
-		col_dir = COLLECTION_DIR.joinpath(self.name)
+		col_dir = COLLECTION_DIR.joinpath(self.slug)
 		col_dir.mkdir(parents=True, exist_ok=True)
 
 		config_file = col_dir.joinpath(DEFAULT_CONFIG_NAME)
@@ -135,7 +136,7 @@ class Collection(BaseModel):
 	def from_name(cls, name):
 		config_file = COLLECTION_DIR.joinpath(name, DEFAULT_CONFIG_NAME)
 		if not config_file.exists():
-			raise Exception('Not found: %s'%str(col_dir))
+			raise Exception('Not found: %s'%str(config_file))
 
 		col_dict = toml.load(config_file)
 		print(col_dict)
@@ -146,6 +147,15 @@ class Collection(BaseModel):
 		if len(self.spectra) == 0:
 			self.spectra = [f.stem for f in self.data_dir.glob('*')]
 		return self.spectra
+
+
+	def get_spectrum(self, spec_name):
+		spec_file = self.data_dir.joinpath('%s.fits'%spec_name)
+		if not spec_file.exists():
+			print('Could not find request spectrum: %s'%str(spec_file))
+
+		from lyra.inputs.sdss import SDSSSpectrum
+		return SDSSSpectrum.from_file(spec_file, self)
 
 
 
@@ -160,4 +170,6 @@ class Spectrum(BaseModel):
 	noise: NDArray = Field(None, description='The noise array.')
 	metadata: dict = Field(default_factory=dict, description='Metadata about the spectrum to display.')
 	collection: str = Field(None, description='The parent collection of which this spectrum belongs.')
+
+# TODO: metadata: redshift, ra, dec, spaxels if IFU, fit info
 

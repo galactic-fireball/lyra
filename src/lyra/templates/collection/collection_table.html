@@ -7,10 +7,17 @@
 {% block content %}
 
 <div id="table-container">
+	<div id="table-header" class="dialog-box">
+		<h2 id="collection-name">{{collection.name}}</h2>
+		<p id="collection-desc">{{collection.description}}</p>
+	</div>
+	<!-- TODO: search, filter, etc -->
+	<!-- TODO: product type is editable -->
+	<!-- TODO: pagination -->
 	<table id="collection-table">
 		<colgroup><col><col><col><col><col></colgroup>
 		<thead>
-			<tr><th>Select</th><th>ID</th><th>Name</th><th>Type</th><th>View</th></tr>
+			<tr><th>Select</th><th>ID</th><th>Name</th><th>Product Type</th><th>View</th></tr>
 		</thead>
 		<tbody>
 

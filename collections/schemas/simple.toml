@@ -1,6 +1,8 @@
 name = "Simple"
 description = "Simple schema template"
 
+product_fmt = "sdss"
+
 components = [
     { name = "model", color = "red" },
 ]
