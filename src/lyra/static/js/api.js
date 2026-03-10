@@ -9,10 +9,23 @@ async function fetchJSON(url, opts={}) {
 	if (!res.ok) {
 		const text = await res.text();
 		log('fetch failed: ' + text);
-		return null
+		return null;
 	}
 
 	return res.json();
+}
+
+
+async function fetchWithParams(url, params={}) {
+	const newURL = url + '?' + new URLSearchParams(params).toString();
+	const res = await fetch(newURL);
+	if (!res.ok) {
+		const text = await res.text();
+		log('fetch failed ' + text);
+		return null;
+	}
+
+	return res;
 }
 
 
@@ -48,3 +61,19 @@ export function createCollection(name, desc, source, schema) {
 	const url = urlFor('collections.new_collection');
 	postData(url, col_data);
 }
+
+
+export async function getActivityHTML(activity) {
+	const url = urlFor('api.activity');
+	const res = await fetchWithParams(url, {activity:activity});
+	return res.text();
+}
+
+
+export async function getSpecData(collection, spec_name) {
+	const url = urlFor('api.spec_data');
+	const res = await fetchWithParams(url, {collection:collection,spec_name:spec_name});
+	return res.json();
+}
+
+

@@ -22,7 +22,7 @@
 		<tbody>
 
 			{% for spec in spectra %}
-				<tr><td><input type="checkbox"></td><td>0001</td><td>{{spec}}</td><td>SDSS</td><td><a href=''>View</a></td></tr>
+				<tr><td><input type="checkbox"></td><td>0001</td><td>{{spec}}</td><td>SDSS</td><td><a href='/spec-viewer/{{ collection.slug }}/{{ spec }}'>View</a></td></tr>
 			{% endfor %}
 		</tbody>
 	</table>

@@ -3,6 +3,11 @@ export function log(msg) {
 }
 
 
+export function cssVar(name) {
+	return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+
 function showElement(el) {
 	el.classList.remove('hidden');
 }

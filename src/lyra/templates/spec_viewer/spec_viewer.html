@@ -1,13 +1,23 @@
 {% extends "base.html" %}
 
 {% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/spectra-viewer.css') }}"/>
 {% endblock %}
 
 {% block content %}
 
-<h1>SPEC VIEWER</h1>
-<div data-component="plot-display">
-	<div id="plot-container">
+<div data-component="spectra-viewer" id="spectra-viewer" class="dialog-box">
+	<div id="viewer-container">
+		<div id="plot-wrapper">
+			<div id="plotly-container"></div>
+		</div>
+	</div>
+</div>
+
+<div data-component="activity-container">
+	<div id="activity-controller" data-collection="{{ collection_slug }}" data-spec="{{ spec_name }}">
+		<div id="activity-switcher">SWITCHER</div>
+		<div id="activity-panel"></div>
 	</div>
 </div>
 

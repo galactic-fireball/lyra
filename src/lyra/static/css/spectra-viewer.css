@@ -1,0 +1,21 @@
+#spectra-viewer {
+    width: 96vw;
+    justify-self: center;
+    padding: 20px;
+    margin: 20px;
+}
+
+#viewer-container {}
+
+#plot-wrapper {
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid black;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 10px 30px rgba(0,0,0,0.6);
+}
+
+#plotly-container {
+    height: 80vh;
+    background: var(--dark-primary);
+    color: var(--text-color);
+}

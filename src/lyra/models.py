@@ -18,11 +18,17 @@ def deserialize_list(data: list) -> npt.NDArray:
 	return np.array(data)
 
 
+def clean_array(data: npt.NDArray) -> npt.NDArray:
+	data[np.isnan(data)] = 0.0
+	data[~np.isfinite(data)] = 0.0
+	return data
+
+
 def serialize_array(array: npt.NDArray) -> list:
 	return array.tolist()
 
 
-NDArray = Annotated[npt.NDArray, BeforeValidator(deserialize_list), PlainSerializer(serialize_array, return_type=list)]
+NDArray = Annotated[npt.NDArray, BeforeValidator(deserialize_list), AfterValidator(clean_array), PlainSerializer(serialize_array, return_type=list)]
 
 
 class Component(BaseModel):
@@ -154,6 +160,7 @@ class Collection(BaseModel):
 		if not spec_file.exists():
 			print('Could not find request spectrum: %s'%str(spec_file))
 
+		# TODO: support other data types
 		from lyra.inputs.sdss import SDSSSpectrum
 		return SDSSSpectrum.from_file(spec_file, self)
 

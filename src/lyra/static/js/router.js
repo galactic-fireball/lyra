@@ -16,8 +16,7 @@ export function urlFor(endpoint, params={}) {
 	log('urlFor: ' + endpoint);
 
 	if (!ROUTES) {
-		log('routes not initialized');
-		return null;
+		loadRoutes()
 	}
 
 	let url = ROUTES[endpoint];
