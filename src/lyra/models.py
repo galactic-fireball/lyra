@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 import pathlib
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator, PlainSerializer
 import toml
@@ -91,14 +92,20 @@ def set_schema(value: Schema | str) -> Schema:
 	return Schema.by_name(value)
 
 
+def serialize_path(value: pathlib.Path | str) -> str:
+	return str(value)
 
+
+# TODO: make Ingestor classes to handle manifest, directory, etc. types of Collection creation
 class Collection(BaseModel):
 	name: str = Field(None, description='The name of the collection.')
 	slug: str = Field(None, description='Slug label used in URLs to represent this Collection.')
 	schema: Annotated[Schema | str, AfterValidator(set_schema)] = Field(None, description='The schema used within the collection.')
 	description: str = Field(None, description='The description of the collection.')
 	spectra: list[str] = Field(default_factory=list, description='The names of all spectral items in the collection.')
-	data_dir: pathlib.Path | str = Field(None, description='The directory containing the spectrum files for this collection.')
+	data_dir: Annotated[pathlib.Path | str, PlainSerializer(serialize_path, return_type=str)] = Field(None, description='The directory containing the spectrum files for this collection.')
+	manifest: Annotated[pathlib.Path | str, PlainSerializer(serialize_path, return_type=str)] = Field(None, description='A manifest csv with all the objects of the collection.')
+	name_col: str = Field(None, description='The name of the column in manifest used to represent the name of each object.')
 	metadata: list[str] = Field(default_factory=list, description='The expected keys of the metadata field for each Spectrum in the Colleciton.')
 
 	collections: ClassVar[dict] = {}
@@ -124,6 +131,11 @@ class Collection(BaseModel):
 		if isinstance(self.data_dir, str):
 			self.data_dir = pathlib.Path(self.data_dir)
 
+		if isinstance(self.manifest, str):
+			self.manifest = pathlib.Path(self.manifest)
+		if (not self.manifest is None) and (not self.manifest.is_absolute()):
+			self.manifest = self.data_dir.joinpath(self.manifest)
+
 		# TODO: check for collection with this name already exists
 		Collection.collections[self.name] = self
 		return self
@@ -132,8 +144,12 @@ class Collection(BaseModel):
 	@staticmethod
 	def get_collections():
 		if len(Collection.collections) == 0:
-			for col_file in COLLECTION_DIR.glob('*'):
-				col = cls(**toml.load(col_file))
+			for col_dir in COLLECTION_DIR.glob('*'):
+				col_file = col_dir.joinpath(DEFAULT_CONFIG_NAME)
+				if not col_file.exists():
+					print('Collection [%s] has no config file'%col_dir.name)
+					continue
+				col = Collection(**toml.load(col_file))
 				Collection.collections[col.name] = col
 		return Collection.collections
 
@@ -149,9 +165,17 @@ class Collection(BaseModel):
 		return cls(**col_dict)
 
 
-	def get_spectra(self):
+	def get_spectra(self) -> list:
 		if len(self.spectra) == 0:
-			self.spectra = [f.stem for f in self.data_dir.glob('*')]
+			if (not self.manifest is None) and (self.manifest.exists()):
+				df = pd.read_csv(self.manifest)
+				if not self.name_col in df:
+					print('Could not find [%s] column in manifest'%name_col)
+					return []
+				self.spectra = list(df[self.name_col].values)
+			else:
+				self.spectra = [f.stem for f in self.data_dir.glob('*')]
+
 		return self.spectra
 
 

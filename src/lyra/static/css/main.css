@@ -15,6 +15,7 @@
     --rred: #f04770;
     --rgradient: linear-gradient(141deg, var(--rblue), var(--rgreen), var(--ryellow), var(--rorange), var(--rred));
     --table-border-radius: 8px;
+    --default-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
 @font-face {
@@ -73,7 +74,7 @@ input.form-item, select.form-item {
 
 .dialog-box {
     border-radius: 50px;
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    box-shadow: var(--default-shadow);
     border: 2px solid transparent;
     background: linear-gradient(var(--dark-second), var(--dark-second)) padding-box, var(--rgradient) border-box;
 }
@@ -85,7 +86,7 @@ table {
     width: 100%;
     border-radius: var(--table-border-radius);
     background: var(--dark-primary);
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    box-shadow: var(--default-shadow);
 
     thead th {
         position: sticky;

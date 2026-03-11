@@ -47,19 +47,18 @@ export async function getSchemas() {
 	return await fetchJSON(url);
 }
 
+export async function getCollections() {
+	log('getCollections');
+	const url = urlFor('collections.get_collections');
+	return await fetchJSON(url);
+}
 
-export function createCollection(name, desc, source, schema) {
+
+export function createCollection(collectionData) {
 	log ('createCollection');
 
-	const col_data = {
-		'name': name,
-		'description': desc,
-		'schema': schema,
-		'data_dir': source
-	}
-
 	const url = urlFor('collections.new_collection');
-	postData(url, col_data);
+	postData(url, collectionData);
 }
 
 

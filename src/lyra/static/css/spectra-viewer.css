@@ -19,3 +19,76 @@
     background: var(--dark-primary);
     color: var(--text-color);
 }
+
+
+#activity-controller {
+    display: flex;
+    flex-direction: column;
+    margin: 40px;
+    padding: 42px;
+    border: 2px solid var(--trim-color-subtle);
+    border-radius: 50px;
+    box-shadow: var(--default-shadow);
+    width: 96vw;
+}
+
+#activity-switcher {
+    display: flex;
+}
+
+#activity-button-container {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--trim-color-subtle);
+    border-radius: 8px;
+    padding: 10px;
+    column-gap: 10px;
+
+    &:hover {
+        background: var(--trim-color-subtle);
+    }
+}
+
+#activity-button {
+    font-size: 24px;
+    font-weight: 100;
+    color: var(--text-color);
+}
+
+#activity-menu {
+    margin: 0px 10px;
+    /*padding: 0px 6px;*/
+    border: 1px solid var(--trim-color-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+
+    display: none;
+    z-index: 1000;
+
+    justify-content: space-evenly;
+    align-items: center;
+
+    &.open {
+        display: flex;
+    }
+}
+
+.activity-item {
+    padding: 10px 30px;
+    font-size: 20px;
+    height: 100%;
+
+    display: flex;
+    place-items: center;
+
+    &:hover {
+        background: var(--trim-color-subtle);
+    }
+}
+
+.activity-item + .activity-item {
+    border-left: 1px solid var(--text-color);
+}
+
+
+

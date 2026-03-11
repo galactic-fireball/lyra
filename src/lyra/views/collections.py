@@ -14,6 +14,13 @@ def collection_creator():
 	return render_template('collection_creator.html')
 
 
+@collections.route('/collections')
+def get_collections():
+	# TODO: fix jsonify and serializing issues
+	# return jsonify({k:s.model_dump() for k,s in Collection.get_collections().items()})
+	return jsonify({s.slug:{} for k,s in Collection.get_collections().items()})
+
+
 @collections.route('/schemas')
 def get_schemas():
 	return jsonify({k:s.model_dump() for k,s in Schema.get_schemas().items()})
@@ -22,6 +29,7 @@ def get_schemas():
 @collections.route('/new-collection', methods=['POST'])
 def new_collection():
 	new_col = Collection(**request.json)
+	return {'success': 'ok'}, 200
 
 
 @collections.get('/<collection_slug>')

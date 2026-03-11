@@ -26,10 +26,10 @@ export function urlFor(endpoint, params={}) {
 	}
 
 	for (const [key,value] of Object.entries(params)) {
-		url = url.replace('{'+key+'}', value);
+		url = url.replace('<'+key+'>', value);
 	}
 
-	if (url.includes('{')) {
+	if (url.includes('<')) {
 		log('Missing parameters for ' + endpoint);
 		return null;
 	}
@@ -46,6 +46,11 @@ export function navigate(endpoint, params={}) {
 
 
 // COLLECTIONS
+
+export function gotoCollection(collection) {
+	log('gotoCollection');
+	navigate('collections.collection_table', {collection_slug:collection});
+}
 
 export function gotoCollectionCreator() {
 	log('gotoCollectionCreator');
