@@ -1,6 +1,6 @@
-import { log, showLoading } from '../utils.js';
+import { log, showLoading, hideLoading } from '../utils.js';
 import { registerComponent, getComponent } from './registry.js';
-import { getActivityHTML, getSpecData } from '../api.js';
+import { getActivityHTML, getSpecData, getNextSpecData, getPrevSpecData, getFeatures, sendActivityData } from '../api.js';
 
 
 const ACTIVITIES = new Map();
@@ -12,7 +12,8 @@ export class ActivityController {
 		log('new ActivityController')
 		this.viewer = getComponent('spectra-viewer');
 		log(this.viewer);
-		this.currentActivityName = 'view';
+		// this.currentActivityName = 'view';
+		this.currentActivityName = 'feat-verify'
 		this.currentActivity = null;
 		const controllerElem = document.querySelector('#activity-controller');
 		this.controllerElem = controllerElem
@@ -23,11 +24,12 @@ export class ActivityController {
 	}
 
 	static async initialize() {
+		showLoading();
 		const ac = new ActivityController();
 		ac.initActivitySwitcher();
 		await ac.setSpecData();
-		await ac.updatePanel();
-		// turn off loading screen?
+		await ac.initializePanel();
+		hideLoading();
 		return ac;
 	}
 
@@ -50,18 +52,15 @@ export class ActivityController {
 			actItem.classList.add('activity-item');
 			actItem.addEventListener('click', () => {
 				this.currentActivityName = actName;
-				this.updatePanel();
+				const activityClass = ACTIVITIES.get(this.currentActivityName);
+				actButton.textContent = 'Activity: ' + activityClass.label;
+				this.initializePanel();
 			});
 			menu.appendChild(actItem);
 		}
 	}
 
-	async setSpecData() {
-		this.currentSpec = await getSpecData(this.currentCollection, this.currentSpecName);
-		log(this.currentSpec);
-	}
-
-	async updatePanel() {
+	async initializePanel() {
 		// TODO: if this.currentActivity is already set, send a shutdown first?
 
 		const activityClass = ACTIVITIES.get(this.currentActivityName);
@@ -71,11 +70,48 @@ export class ActivityController {
 		}
 
 		this.currentActivity = new activityClass(this);
+		this.currentActivity.initialize();
+		this.currentActivity.updateViewer();
+	}
+
+	async setSpecData() {
+		this.currentSpec = await getSpecData(this.currentCollection, this.currentSpecName);
+		log(this.currentSpec);
+	}
+
+	async nextSpec() {
+		showLoading();
+		this.currentSpec = await getNextSpecData(this.currentCollection, this.currentSpecName);
+		if (!this.currentSpec) { this.viewer.setNoDataPlot(); hideLoading(); return; }
+
+		this.currentSpecName = this.currentSpec.name;
+		this.updatePanel();
+		this.updateURL(this.currentSpecName);
+		hideLoading();
+	}
+
+	async prevSpec() {
+		showLoading();
+		this.currentSpec = await getPrevSpecData(this.currentCollection, this.currentSpecName);
+		if (!this.currentSpec) { this.viewer.setNoDataPlot(); hideLoading(); return; }
+
+		this.currentSpecName = this.currentSpec.name;
+		this.updatePanel();
+		this.updateURL(this.currentSpecName);
+		hideLoading();
+	}
+
+	updateURL(specName) {
+		const newUrl = '/spec-viewer/' + this.currentCollection + '/' + this.currentSpecName;
+		history.pushState({spec: this.currentSpecName}, '', newUrl);
+	}
+
+	updatePanel() {
 		this.currentActivity.updateViewer();
 	}
 
 	updateViewer() {
-		if (!this.currentSpec) { return; }
+		if (!this.currentSpec) { this.viewer.setNoDataPlot(); return; }
 
 		this.viewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.metadata.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.metadata.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.metadata.redshift.toFixed(4));
 		this.viewer.setWaveArray(this.currentSpec.wave);
@@ -93,6 +129,10 @@ class Activity {
 		this.controller = controller
 		this.viewer = controller.viewer;
 	}
+
+	initialize() {}
+
+	setupHotKeys() {}
 
 	updateViewer() {
 		this.controller.updateViewer();
@@ -120,21 +160,68 @@ class FeatureVerifyActivity extends Activity {
 
 	constructor(controller) {
 		super(controller);
+		this.features = new Map();
+		this.currentFeature = null;
 	}
+
+
+	async initialize() {
+		const featSelector = document.querySelector('#feature-selector');
+		const features = await getFeatures(this.controller.currentCollection);
+		for (const feat of features) {
+			this.features.set(feat.name, feat.wave)
+
+			const option = document.createElement('option');
+			option.value = feat.name;
+			option.textContent = feat.name
+			featSelector.appendChild(option);
+		}
+
+		featSelector.addEventListener('change', (event) => {
+			this.currentFeature = event.target.value;
+			this.updateViewer();
+		});
+
+		document.addEventListener('keydown', (event) => { this.handleKeyDown(event); });
+	}
+
+
+	handleKeyDown(e) {
+		if (e.key === 'ArrowLeft') {
+			this.controller.prevSpec();
+		} else if (e.key == 'ArrowRight') {
+			this.controller.nextSpec();
+		} else if (e.key == '0') {
+			this.markSpec(0);
+		} else if (e.key == '1') {
+			this.markSpec(1);
+		} else if (e.key == '2') {
+			this.markSpec(2);
+		}
+	}
+
+
+	markSpec(value) {
+		sendActivityData({
+			collection:this.controller.currentCollection,
+			spec_name:this.controller.currentSpecName,
+			data_col:this.currentFeature+'_INSPECT',
+			data_val:value
+		});
+		this.controller.nextSpec();
+	}
+
 
 	updateViewer() {
 		super.updateViewer();
+		this.viewer.removeAllFeatures();
 
-		// this.viewer.addFeature('OIII', 5008);
-		// this.viewer.addComponent('Data', this.currentSpec.data);
+		if (this.currentFeature) {
+			this.viewer.addFeature(this.currentFeature, this.features.get(this.currentFeature));
+		}
 
 		this.viewer.reloadPlot();
 	}
 }
 ACTIVITIES.set('feat-verify', FeatureVerifyActivity);
-
-
-
-
-
 

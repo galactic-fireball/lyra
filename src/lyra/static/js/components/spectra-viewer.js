@@ -1,4 +1,4 @@
-import { log, cssVar } from '../utils.js';
+import { log, cssVar, showLoading, hideLoading } from '../utils.js';
 import { registerComponent } from './registry.js';
 
 const TRANSPARENT = 'rgba(0,0,0,0)'
@@ -8,6 +8,7 @@ export class SpectraViewer {
 	static viewerID = 'plotly-container';
 
 	static nodata_layout = {
+		title: {text: '', subtitle: {text: ''}},
 		annotations: [{text: 'No Data', font:{size:30}, xref: 'paper', x:0.5,
 		yref: 'paper', y:0.5, showarrow:false}], paper_bgcolor: TRANSPARENT,
 		plot_bgcolor: TRANSPARENT,
@@ -26,7 +27,9 @@ export class SpectraViewer {
 		this.traces = new Map();
 		this.features = new Map();
 
+		showLoading();
 		this.initPlotViewer();
+		hideLoading();
 	}
 
 	initPlotViewer() {
@@ -34,6 +37,8 @@ export class SpectraViewer {
 	}
 
 	setNoDataPlot() {
+		this.title = null;
+		this.subtitle = null;
 		Plotly.react(SpectraViewer.viewerID, [{x:[],y:[]}], SpectraViewer.nodata_layout, {responsive:true});
 	}
 
@@ -67,12 +72,33 @@ export class SpectraViewer {
 	}
 
 
+	removeComponent(name) {
+		this.traces.delete(name);
+	}
+
+
+	removeAllComponents() {
+		this.traces = new Map();
+	}
+
+
 	addFeature(name, wave) {
 		this.features.set(name, wave);
 	}
 
 
+	removeFeature(name) {
+		this.features.delete(name);
+	}
+
+
+	removeAllFeatures() {
+		this.features = new Map();
+	}
+
+
 	reloadPlot() {
+		showLoading();
 		var plotTraces = [];
 
 		// Add noise if available (and data is as well)
@@ -83,6 +109,7 @@ export class SpectraViewer {
 				mode: 'lines',
 				line: {width:0},
 				showlegend: false,
+				hoverinfo: 'skip',
 			});
 
 			plotTraces.push({
@@ -92,7 +119,8 @@ export class SpectraViewer {
 				fill: 'tonexty',
 				fillcolor: cssVar('--text-color-subtle'),
 				line: {width:0},
-				name: 'Noise'
+				name: 'Noise',
+				hoverinfo: 'skip',
 			});
 		}
 
@@ -104,7 +132,7 @@ export class SpectraViewer {
 				type: 'scatter',
 				mode: 'lines',
 				marker: {color: cssVar('--trim-color')},
-				name: 'Data'
+				name: 'Data',
 			});
 		}
 
@@ -153,6 +181,7 @@ export class SpectraViewer {
 
 		var config = { responsive: true, };
 		Plotly.react(SpectraViewer.viewerID, plotTraces, layout, config);
+		hideLoading();
 	}
 }
 

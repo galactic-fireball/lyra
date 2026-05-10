@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "json-schema-to-typescript": "^15.0.4",
+    "json2ts": "^0.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0"
+  }
+}

@@ -10,8 +10,8 @@ def init_app():
 			routes[rule.endpoint] = rule.rule
 		return jsonify(routes)
 
-	from lyra.views.collections import collections
-	app.register_blueprint(collections, url_prefix='/collections')
+	from lyra.views.catalog import catalog
+	app.register_blueprint(catalog, url_prefix='/catalog')
 
 	from lyra.views.spec_viewer import spec_viewer
 	app.register_blueprint(spec_viewer, url_prefix='/spec-viewer')
@@ -21,6 +21,6 @@ def init_app():
 
 	@app.route('/')
 	def index():
-		return redirect(url_for('collections.chooser'))
+		return redirect(url_for('catalog.chooser'))
 
 	return app

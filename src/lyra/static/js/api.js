@@ -40,25 +40,33 @@ async function postData(url, data={}) {
 }
 
 
-export async function getSchemas() {
-	log('getSchemas');
-
-	const url = urlFor('collections.get_schemas');
+export async function getDataModels() {
+	log('getDataModels');
+	const url = urlFor('api.get_data_models');
 	return await fetchJSON(url);
 }
 
-export async function getCollections() {
-	log('getCollections');
-	const url = urlFor('collections.get_collections');
+// TODO: sync api for data dict
+export async function getDataModel(modelName) {
+	log('getDataModel');
+	const url = urlFor('api.get_data_model');
+	const res = await fetchWithParams(url, {model:modelName});
+	return res.json();
+}
+
+export async function getCatalogs() {
+	log('getCatalogs');
+	const url = urlFor('catalog.get_catalogs');
 	return await fetchJSON(url);
 }
 
 
-export function createCollection(collectionData) {
-	log ('createCollection');
+export async function createCatalog(catalogData) {
+	log('createCatalog');
 
-	const url = urlFor('collections.new_collection');
-	postData(url, collectionData);
+	const url = urlFor('catalog.new_catalog');
+	const res = await postData(url, catalogData);
+	return res;
 }
 
 
@@ -69,10 +77,41 @@ export async function getActivityHTML(activity) {
 }
 
 
-export async function getSpecData(collection, spec_name) {
+export async function getSpecData(catalog, spec_name) {
 	const url = urlFor('api.spec_data');
-	const res = await fetchWithParams(url, {collection:collection,spec_name:spec_name});
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:spec_name});
 	return res.json();
 }
+
+
+export async function getNextSpecData(catalog, spec_name) {
+	const url = urlFor('api.spec_data');
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:spec_name,mode:'next'});
+	if (!res) { return null; }
+	return res.json();
+}
+
+
+export async function getPrevSpecData(catalog, spec_name) {
+	const url = urlFor('api.spec_data');
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:spec_name,mode:'prev'});
+	if (!res) { return null; }
+	return res.json();
+}
+
+
+export async function getFeatures(catalog) {
+	const url = urlFor('api.features');
+	const res = await fetchWithParams(url, {catalog:catalog});
+	if (!res) { return null; }
+	return res.json();
+}
+
+export async function sendActivityData(data) {
+	log('sendActivityData');
+	const url = urlFor('api.activity_data');
+	await postData(url, data);
+}
+
 
 

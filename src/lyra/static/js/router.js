@@ -45,15 +45,15 @@ export function navigate(endpoint, params={}) {
 }
 
 
-// COLLECTIONS
+// Catalog
 
-export function gotoCollection(collection) {
-	log('gotoCollection');
-	navigate('collections.collection_table', {collection_slug:collection});
+export function gotoCatalog(catalog) {
+	log('gotoCatalog');
+	navigate('catalog.catalog_table', {catalog_slug:catalog});
 }
 
-export function gotoCollectionCreator() {
-	log('gotoCollectionCreator');
-	navigate('collections.collection_creator');
+export function gotoCatalogCreator() {
+	log('gotoCatalogCreator');
+	navigate('catalog.catalog_creator');
 }
 

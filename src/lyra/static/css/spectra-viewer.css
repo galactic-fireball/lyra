@@ -15,7 +15,7 @@
 }
 
 #plotly-container {
-    height: 80vh;
+    height: 75vh;
     background: var(--dark-primary);
     color: var(--text-color);
 }
@@ -34,6 +34,7 @@
 
 #activity-switcher {
     display: flex;
+    margin-bottom: 20px;
 }
 
 #activity-button-container {
@@ -41,7 +42,7 @@
     align-items: center;
     border: 2px solid var(--trim-color-subtle);
     border-radius: 8px;
-    padding: 10px;
+    padding: 10px 20px;
     column-gap: 10px;
 
     &:hover {
@@ -89,6 +90,36 @@
 .activity-item + .activity-item {
     border-left: 1px solid var(--text-color);
 }
+
+
+#activity-panel {
+    margin: 20px 0px;
+    padding: 20px 0px;
+}
+
+
+/* FEAT VERIFICATION */
+
+#feat-verify-container {
+    width: fit-content;
+    padding: 20px;
+    font-size: 24px;
+    border: 2px solid var(--trim-color);
+    border-radius: 8px;
+}
+
+#feature-selector {
+    width: auto;
+    margin: 0px 20px;
+    background: var(--dark-primary);
+    color: var(--text-color);
+    font-size: 20px;
+    border: none;
+}
+
+
+
+
 
 
 

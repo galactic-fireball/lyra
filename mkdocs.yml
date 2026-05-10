@@ -1,0 +1,37 @@
+site_name: Lyra Documentation
+repo_name: Lyra
+repo_url: https://github.com/galactic-fireball/lyra
+site_url: https://galactic-fireball.github.io/lyra
+theme:
+  name: material
+  language: en
+  font:
+    text: Merriweather Sans
+    code: Red Hat Mono
+  icon:
+    logo: material/alpha-b-box-outline
+  features:
+    - navigation.footer
+  palette:
+    # dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Dark Mode
+      primary: blue
+      accent: purple
+
+    # light mode
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Light Mode
+      primary: blue
+      accent: purple
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage:
+    - Activities: usage/activities.md
+    - Actions: usage/actions.md

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/catalog.css') }}"/>
+{% endblock %}
+
+{% block content %}
+	<div data-component="catalog-creator">
+		<div class="dialog-box modal-container">
+			<div class="modal-section">
+				<div class="modal-label">New Catalog:</div>
+				<div id="catalog-info" class="info-list">
+					<label for="catalog-name" class="form-item">Name:</label>
+					<input id="catalog-name" class="form-item"></input>
+					<label for="catalog-desc" class="form-item">Description:</label>
+					<input id="catalog-desc" class="form-item"></input>
+					<label for="catalog-source" class="form-item">Data Source:</label>
+					<input id="catalog-source" class="form-item"></input>
+					<label for="catalog-manifest" class="form-item">Manifest Name:</label>
+					<input id="catalog-manifest" class="form-item"></input>
+					<label for="catalog-model" class="form-item">Data Model:</label>
+					<select id="catalog-model" class="form-item"></select>
+				</div>
+				<div id="catalog-submit-button" class="button-typeA">Submit</div>
+			</div>
+			<div class="section-divider"></div>
+			<div class="modal-section">
+				<div class="modal-label">Selected Data Model:</div>
+				<div id="model-details" class="info-list">
+					<label for="model-name" class="form-item">Model Name:</label>
+					<input id="model-name" class="form-item"></input>
+					<label for="model-name-col" class="form-item">Object Name Column:</label>
+					<input id="model-name-col" class="form-item"></input>
+				<div class="modal-accordion">
+
+					<div class="modal-card">
+						<div id="fields-header" class="card-header">
+							<span>Fields v</span>
+						</div>
+						<div id="fields-content" class="card-content">
+							<table id="fields-table">
+								<thead>
+									<tr>
+										<th>Name</th><th>Column</th><th>Type</th><th>Units</th><th>Log</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="modal-card">
+						<div id="features-header" class="card-header">
+							<span>Features v</span>
+						</div>
+						<div id="features-content" class="card-content">
+						</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}
