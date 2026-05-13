@@ -20,7 +20,7 @@ async function loadCatalogChooser() {
 	let catalogs = await getCatalogs();
 	const catalogList = document.querySelector('#catalog-list');
 	if (catalogList) {
-		Object.keys(catalogs).forEach(key => {
+		catalogs.forEach(key => {
 			const catButton = document.createElement('li');
 			catButton.textContent = key;
 			catButton.classList.add('button-typeA');
@@ -50,12 +50,40 @@ async function loadCatalogCreator() {
 		for (const field of model.fields) {
 			const fieldRow = document.createElement('tr');
 			for (const item of tableColumns) {
-				const td = document.createElement('td')
-				td.textContent = field[item];
+				const td = document.createElement('td');
+				const tdi = document.createElement('input');
+				tdi.classList.add('form-item');
+				tdi.value = field[item];
+				td.appendChild(tdi);
 				fieldRow.appendChild(td);
 			}
 			fieldTable.appendChild(fieldRow);
 		}
+
+		const fieldNamesContainer = document.querySelector('#feature-names-list');
+		for (const name of model.features.names) {
+			const el = document.createElement('div');
+			el.textContent = name;
+			el.classList.add('name-pill')
+			fieldNamesContainer.appendChild(el);
+		}
+
+		const attrColumns = ['name', 'type', 'units', 'is_log'];
+		const attrTable = document.querySelector('#feature-attr-table > tbody');
+		for (const attr of model.features.attributes) {
+			const attrRow = document.createElement('tr');
+			for (const item of attrColumns) {
+				const td = document.createElement('td');
+				const tdi = document.createElement('input');
+				tdi.classList.add('form-item');
+				tdi.value = attr[item];
+				td.appendChild(tdi);
+				attrRow.appendChild(td);
+			}
+			attrTable.appendChild(attrRow);
+		}
+
+		document.querySelector('#column-format').value = model.features.column_format;
 	}
 
 	document.querySelectorAll('.card-header').forEach(header => {
@@ -91,9 +119,9 @@ async function loadCatalogCreator() {
 			const catalogData = {
 				'name': document.querySelector('#catalog-name').value,
 				'description': document.querySelector('#catalog-desc').value,
-				'data_dir': document.querySelector('#catalog-source').value,
+				'repository': document.querySelector('#catalog-source').value,
 				'manifest': document.querySelector('#catalog-manifest').value,
-				'model': modelSelector.value,
+				'data_model': modelSelector.value,
 			}
 
 			newCatalog(catalogData);

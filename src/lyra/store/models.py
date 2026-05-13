@@ -1,7 +1,9 @@
 import json
 import pathlib
 
-DATA_DIR = pathlib.Path(__file__).resolve().parent.parent.parent.joinpath('data')
+from lyra.utils import serialize
+
+DATA_DIR = pathlib.Path(__file__).resolve().parent.parent.parent.parent.joinpath('data')
 CATALOG_DIR = DATA_DIR.joinpath('catalogs')
 DATAMODEL_DIR = DATA_DIR.joinpath('models')
 
@@ -13,7 +15,7 @@ def get_abs_path(path):
 
 def json_store(obj, path):
 	with open(get_abs_path(path), 'w') as f:
-		json.dump(obj, f, indent=4)
+		json.dump(serialize(obj), f, indent=4)
 
 
 def load_json(_path):
@@ -30,7 +32,7 @@ def load_json(_path):
 def store_catalog(cat):
 	CATALOG_DIR.mkdir(parents=True, exist_ok=True)
 	cat_file = CATALOG_DIR.joinpath(cat.slug+'.json')
-	json_store(cat, cat_file)
+	json_store(cat.dict(), cat_file)
 
 
 def load_catalog(cat_name):

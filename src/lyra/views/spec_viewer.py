@@ -22,4 +22,5 @@ def show_spec(catalog_slug, spec_name):
 		print('Spectrum %s not found'%spec_name)
 		return {'error': 'Spectrum not found'}, 404
 
-	return render_template('spec_viewer.html', catalog_slug=cat.slug, spec_name=spectrum.name)
+	print('Rendering: %s [%s]'%(spectrum.target.name,cat.slug))
+	return render_template('spec_viewer.html', catalog_slug=cat.slug, spec_name=spectrum.target.name)

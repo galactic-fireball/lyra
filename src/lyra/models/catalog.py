@@ -3,8 +3,11 @@ import pathlib
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import ClassVar
 
+from spark.io import load_spectral_product
+
 from lyra.models import DataModel, EmptyModel
 from lyra.store.models import store_catalog, load_catalog, load_catalogs
+from lyra.utils import serialize
 
 class Catalog(BaseModel):
 	model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -28,35 +31,61 @@ class Catalog(BaseModel):
 		if isinstance(self.repository, str):
 			self.repository = pathlib.Path(self.repository)
 
+		if isinstance(self.data_model, str):
+			self.data_model = DataModel.from_name(self.data_model)
+
 		if self.manifest:
 			self._mdf = pd.read_csv(self.manifest)
 
-		Catalog.catalogs[self.name] = self
+		store_catalog(self)
+		Catalog.catalogs[self.slug] = self
 		return self
 
 
 	@classmethod
 	def from_name(cls, name):
+		print('Catalog.from_name: %s'%name)
+		Catalog.get_catalogs()
+		cat = Catalog.catalogs.get(name, None)
+		if not cat is None:
+			return cat
+
 		cat_data = load_catalog(name)
 		if not cat_data:
 			print('Invalid catalog name: %s'%name)
 			return None
-		return cls(**col_dict)
+		return cls(**cat_data)
+
+
+	def to_dict(self):
+		return serialize(self.model_dump())
 
 
 	@staticmethod
 	def get_catalogs():
 		if len(Catalog.catalogs) == 0:
 			[Catalog(**cat_data) for cat_data in load_catalogs()]
+		print('Catalogs:')
+		for name, cat in Catalog.catalogs.items():
+			print('%s (%s)'%(name,cat.slug))
 		return Catalog.catalogs
 
 
 	def get_spectra(self):
-		if not self._mdf:
+		if self._mdf is None:
 			return []
 
 		name_col = self.data_model.name_column
-		return [self._mdf[name_col].values]
+		return self._mdf[name_col].values
+
+
+	def get_spectrum(self, spec_name):
+		spec_file = self.repository.joinpath('%s.fits'%spec_name)
+		if not spec_file.exists():
+			print('Could not find request spectrum: %s'%str(spec_file))
+			return None
+
+		return load_spectral_product(spec_file, 'SDSS', name=spec_file.stem)
 
 
 # class SurveyCollection(Collection):

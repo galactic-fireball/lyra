@@ -4,7 +4,7 @@
     justify-content: space-around;
     align-items: stretch;
     justify-self: center;
-    margin-top: 20vh;
+    margin-top: 10vh;
     margin-bottom: 20vh;
     min-width: 33vw;
     padding: 30px;
@@ -33,11 +33,10 @@
 
         .info-list {
             width: 100%;
-            max-width: 400px;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            grid-template-rows: 1fr;
-            place-items: center;
+            /*max-width: 400px;*/
+            display: flex;
+            flex-direction: column;
+            /*place-items: center;*/
             margin: 10px 0px;
         }
     }
@@ -50,8 +49,8 @@
     gap: 12px;
 
     .modal-card {
-        background: red;
-        border: 1px solid yellow;
+        background: var(--dark-second);
+        border: 1px solid var(--trim-color);
         border-radius: 14px;
         overflow: hidden;
 
@@ -63,17 +62,17 @@
             justify-content: space-between;
             align-items: center;
 
-            background: transparent;
+            background: var(--dark-primary);
             border: none;
 
-            color: cyan;
+            color: var(--text-color);
             font-size: 18px;
             font-weight: 600;
 
             cursor: pointer;
 
             &:hover {
-                background: green;
+                background: var(--trim-color-subtle);
             }
         }
 
@@ -90,6 +89,66 @@
         max-height: 300px;
         overflow-y: auto;
         padding: 14px 18px;
-        border-top: 1px solid magenta;
+        border-top: 1px solid var(--trim-color);
     }
+}
+
+.details-table {
+    thead th {
+        color: var(--text-color);
+    }
+
+    th, td {
+        background: var(--dark-second);
+        border-inline-width: 0 0;
+        text-align: left;
+        padding: 10px 20px;
+    }
+
+    td input {
+        width: 80px;
+    }
+
+    tr:hover {
+        color: var(--text-color);
+    }
+}
+
+.details-table tbody tr td input {
+    font-size: 12px;
+    margin: 4px 8px;
+    background: var(--dark-primary);
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 3px 7px;
+    outline: none;
+}
+
+#feature-attr-table {
+    margin: 10px 0;
+}
+
+#feature-names-list {
+    background: var(--dark-primary);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--trim-subtle);
+    margin-bottom: 10px;
+
+    .name-pill {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid var(--trim-color);
+        min-width: 50px;
+        text-align: center;
+    }
+}
+
+#column-format-row {
+    margin-top: 20px;
 }

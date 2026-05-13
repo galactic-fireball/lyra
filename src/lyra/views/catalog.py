@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request
 
 from lyra.models import Catalog
+from lyra.utils import serialize
 
 catalog = Blueprint('catalog', __name__, static_folder='static', template_folder='../templates/catalog')
 
@@ -20,9 +21,13 @@ def get_catalogs():
 	return jsonify(list(Catalog.get_catalogs().keys()))
 
 
-# @catalog.route('/schemas')
-# def get_schemas():
-# 	return jsonify({k:s.model_dump() for k,s in Schema.get_schemas().items()})
+@catalog.route('/catalog')
+def get_catalog():
+	cat_name = request.args.get('catalog')
+	cat = Catalog.from_name(cat_name)
+	if not cat:
+		return jsonify({'error': 'Catalog not found'}), 404
+	return jsonify(serialize(cat.to_dict()))
 
 
 @catalog.route('/new-catalog', methods=['POST'])

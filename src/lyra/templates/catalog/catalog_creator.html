@@ -10,16 +10,26 @@
 			<div class="modal-section">
 				<div class="modal-label">New Catalog:</div>
 				<div id="catalog-info" class="info-list">
-					<label for="catalog-name" class="form-item">Name:</label>
-					<input id="catalog-name" class="form-item"></input>
-					<label for="catalog-desc" class="form-item">Description:</label>
-					<input id="catalog-desc" class="form-item"></input>
-					<label for="catalog-source" class="form-item">Data Source:</label>
-					<input id="catalog-source" class="form-item"></input>
-					<label for="catalog-manifest" class="form-item">Manifest Name:</label>
-					<input id="catalog-manifest" class="form-item"></input>
-					<label for="catalog-model" class="form-item">Data Model:</label>
-					<select id="catalog-model" class="form-item"></select>
+					<div class="form-row">
+						<label for="catalog-name" class="form-item">Name:</label>
+						<input id="catalog-name" class="form-item"></input>
+					</div>
+					<div class="form-row">
+						<label for="catalog-desc" class="form-item">Description:</label>
+						<input id="catalog-desc" class="form-item"></input>
+					</div>
+					<div class="form-row">
+						<label for="catalog-source" class="form-item">Data Source:</label>
+						<input id="catalog-source" class="form-item"></input>
+					</div>
+					<div class="form-row">
+						<label for="catalog-manifest" class="form-item">Manifest Name:</label>
+						<input id="catalog-manifest" class="form-item"></input>
+					</div>
+					<div class="form-row">
+						<label for="catalog-model" class="form-item">Data Model:</label>
+						<select id="catalog-model" class="form-item"></select>
+					</div>
 				</div>
 				<div id="catalog-submit-button" class="button-typeA">Submit</div>
 			</div>
@@ -27,10 +37,14 @@
 			<div class="modal-section">
 				<div class="modal-label">Selected Data Model:</div>
 				<div id="model-details" class="info-list">
-					<label for="model-name" class="form-item">Model Name:</label>
-					<input id="model-name" class="form-item"></input>
-					<label for="model-name-col" class="form-item">Object Name Column:</label>
-					<input id="model-name-col" class="form-item"></input>
+					<div class="form-row">
+						<label for="model-name" class="form-item">Model Name:</label>
+						<input id="model-name" class="form-item"></input>
+					</div>
+					<div class="form-row">
+						<label for="model-name-col" class="form-item">Object Name Column:</label>
+						<input id="model-name-col" class="form-item"></input>
+					</div>
 				<div class="modal-accordion">
 
 					<div class="modal-card">
@@ -38,10 +52,14 @@
 							<span>Fields v</span>
 						</div>
 						<div id="fields-content" class="card-content">
-							<table id="fields-table">
+							<table id="fields-table" class="details-table">
 								<thead>
 									<tr>
-										<th>Name</th><th>Column</th><th>Type</th><th>Units</th><th>Log</th>
+										<th>Name</th>
+										<th>Column</th>
+										<th>Type</th>
+										<th>Units</th>
+										<th>Log</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -55,6 +73,27 @@
 							<span>Features v</span>
 						</div>
 						<div id="features-content" class="card-content">
+
+							<div id="feature-names-list"></div>
+
+							<table id="feature-attr-table" class="details-table">
+								<thead>
+									<tr>
+										<th>Name</th>
+										<th>Type</th>
+										<th>Units</th>
+										<th>Log</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+
+							<div id="column-format-row" class="form-row">
+								<label for="column-format" class="form-item">Column Format:</label>
+								<input id="column-format" class="form-item"></input>
+							</div>
+
 						</div>
 					</div>
 

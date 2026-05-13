@@ -60,6 +60,12 @@ export async function getCatalogs() {
 	return await fetchJSON(url);
 }
 
+export async function getCatalog(catalogName) {
+	log('getCatalog');
+	const url = urlFor('catalog.get_catalog');
+	const res = await fetchWithParams(url, {catalog:catalogName});
+	return res.json();
+}
 
 export async function createCatalog(catalogData) {
 	log('createCatalog');

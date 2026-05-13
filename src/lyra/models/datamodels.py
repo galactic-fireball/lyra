@@ -9,6 +9,8 @@ from typing import ClassVar
 # import toml
 # from typing import Annotated, Any, ClassVar
 
+from spark.spectral_features.models import SpectralLine
+
 from lyra.store.models import load_model, load_models
 from lyra.utils import serialize
 
@@ -44,7 +46,7 @@ class DataAttribute(DataValue):
 
 @dataclass
 class DataFeatures:
-	names: list[str] = field(default_factory=list)
+	lines: list[SpectralLine] = field(default_factory=list)
 	attributes: list[DataAttribute] = field(default_factory=list)
 	column_format: str = '{name_upper}_{attr_upper}'
 
@@ -129,7 +131,10 @@ TestModel = DataModel(name='Basic', name_column='spec_name',
 		DataField(name='z', column='z'),
 	],
 	features=DataFeatures(
-		names=['H_BETA', 'OIII',],
+		lines=[
+			SpectralLine(name='H_BETA', center=4862.691),
+			SpectralLine(name='OIII_5007', center=5008.240),
+		],
 		attributes=[
 			DataAttribute(name='FLUX', units='erg / s / cm**2 / AA', is_log=True),
 			DataAttribute(name='FWHM', units='km / s')

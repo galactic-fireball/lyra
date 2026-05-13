@@ -1,6 +1,6 @@
 import { log, showLoading, hideLoading } from '../utils.js';
 import { registerComponent, getComponent } from './registry.js';
-import { getActivityHTML, getSpecData, getNextSpecData, getPrevSpecData, getFeatures, sendActivityData } from '../api.js';
+import { getCatalog, getActivityHTML, getSpecData, getNextSpecData, getPrevSpecData, getFeatures, sendActivityData } from '../api.js';
 
 
 const ACTIVITIES = new Map();
@@ -18,14 +18,21 @@ export class ActivityController {
 		const controllerElem = document.querySelector('#activity-controller');
 		this.controllerElem = controllerElem
 		this.panelElem = document.querySelector('#activity-panel');
-		this.currentCollection = controllerElem.dataset.collection;
+		this.currentCatalogName = controllerElem.dataset.catalog;
+		this.currentCatalog = null;
 		this.currentSpecName = controllerElem.dataset.spec;
+		log('currentCatalogName: '+this.currentCatalogName);
+		log('currentSpecName: '+this.currentSpecName);
 		this.currentSpec = null;
 	}
 
 	static async initialize() {
 		showLoading();
 		const ac = new ActivityController();
+		log(ac);
+		ac.currentCatalog = await getCatalog(ac.currentCatalogName);
+		log('CATALOG');
+		log(ac.currentCatalog);
 		ac.initActivitySwitcher();
 		await ac.setSpecData();
 		await ac.initializePanel();
@@ -75,13 +82,15 @@ export class ActivityController {
 	}
 
 	async setSpecData() {
-		this.currentSpec = await getSpecData(this.currentCollection, this.currentSpecName);
+		log('setSpecData');
+		log(this.currentCatalog);
+		this.currentSpec = await getSpecData(this.currentCatalog.slug, this.currentSpecName);
 		log(this.currentSpec);
 	}
 
 	async nextSpec() {
 		showLoading();
-		this.currentSpec = await getNextSpecData(this.currentCollection, this.currentSpecName);
+		this.currentSpec = await getNextSpecData(this.currentCatalog, this.currentSpecName);
 		if (!this.currentSpec) { this.viewer.setNoDataPlot(); hideLoading(); return; }
 
 		this.currentSpecName = this.currentSpec.name;
@@ -92,7 +101,7 @@ export class ActivityController {
 
 	async prevSpec() {
 		showLoading();
-		this.currentSpec = await getPrevSpecData(this.currentCollection, this.currentSpecName);
+		this.currentSpec = await getPrevSpecData(this.currentCatalog, this.currentSpecName);
 		if (!this.currentSpec) { this.viewer.setNoDataPlot(); hideLoading(); return; }
 
 		this.currentSpecName = this.currentSpec.name;
@@ -102,7 +111,7 @@ export class ActivityController {
 	}
 
 	updateURL(specName) {
-		const newUrl = '/spec-viewer/' + this.currentCollection + '/' + this.currentSpecName;
+		const newUrl = '/spec-viewer/' + this.currentCatalog + '/' + this.currentSpecName;
 		history.pushState({spec: this.currentSpecName}, '', newUrl);
 	}
 
@@ -113,9 +122,9 @@ export class ActivityController {
 	updateViewer() {
 		if (!this.currentSpec) { this.viewer.setNoDataPlot(); return; }
 
-		this.viewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.metadata.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.metadata.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.metadata.redshift.toFixed(4));
+		this.viewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.target.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.target.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.target.z.toFixed(4));
 		this.viewer.setWaveArray(this.currentSpec.wave);
-		this.viewer.addData(this.currentSpec.data, this.currentSpec.noise);
+		this.viewer.addData(this.currentSpec.flux, this.currentSpec.err);
 	}
 }
 
@@ -166,10 +175,12 @@ class FeatureVerifyActivity extends Activity {
 
 
 	async initialize() {
+		log('feat verify initialize');
+		log(this.controller.currentCatalog);
 		const featSelector = document.querySelector('#feature-selector');
-		const features = await getFeatures(this.controller.currentCollection);
+		const features = this.controller.currentCatalog.data_model.features.lines;
 		for (const feat of features) {
-			this.features.set(feat.name, feat.wave)
+			this.features.set(feat.name, feat.center)
 
 			const option = document.createElement('option');
 			option.value = feat.name;
@@ -203,7 +214,7 @@ class FeatureVerifyActivity extends Activity {
 
 	markSpec(value) {
 		sendActivityData({
-			collection:this.controller.currentCollection,
+			catalog:this.controller.currentCatalog.name,
 			spec_name:this.controller.currentSpecName,
 			data_col:this.currentFeature+'_INSPECT',
 			data_val:value

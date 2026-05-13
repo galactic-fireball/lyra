@@ -16,8 +16,7 @@ def get_data_model():
 	model_name = request.args.get('model')
 	dm = DataModel.from_name(model_name)
 	if not dm:
-		return {'error': 'Data Model not found'}, 404
-
+		return jsonify({'error': 'Data Model not found'}), 404
 	return jsonify(serialize(dm.to_dict()))
 
 
@@ -43,7 +42,7 @@ def spec_data():
 		print('Spectrum %s not found'%spec_name)
 		return {'error': 'Spectrum not found'}, 404
 
-	return jsonify(serialize(spectrum.model_dump()))
+	return jsonify(serialize(spectrum.to_dict()))
 
 
 @api.route('activity')
@@ -52,11 +51,11 @@ def activity():
 	return render_template(activity + '.html')
 
 
-@api.route('features')
-def features():
-	catalog = request.args.get('catalog')
-	cat = Catalog.from_name(catalog)
-	return jsonify(serialize([feat.model_dump() for feat in cat.schema.features]))
+# @api.route('features')
+# def features():
+# 	catalog = request.args.get('catalog')
+# 	cat = Catalog.from_name(catalog)
+# 	return jsonify(serialize([feat.model_dump() for feat in cat.schema.features]))
 
 
 @api.route('activity-data', methods=['POST'])
