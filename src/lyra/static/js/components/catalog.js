@@ -1,7 +1,7 @@
 // import { Catalog } from '../apiTypes.ts';
 import { log, showLoading } from '../utils.js';
 import { gotoCatalog, gotoCatalogCreator } from '../router.js';
-import { getDataModels, getDataModel, getCatalogs, createCatalog } from '../api.js';
+import { getDataModels, getDataModel, getCatalogs, createCatalog, getCatalog, getSpecInfo } from '../api.js';
 import { registerComponent } from './registry.js';
 
 
@@ -138,5 +138,101 @@ async function newCatalog(catalogData) {
 }
 
 
+function resolveColumn(columnFormat, name, attr) {
+	return columnFormat.replaceAll('{name}',name).replaceAll('{name_lower}',name.toLowerCase()).replaceAll('{name_upper}',name.toUpperCase())
+					   .replaceAll('{attr}',attr).replaceAll('{attr_lower}',attr.toLowerCase()).replaceAll('{attr_upper}',attr.toUpperCase())
+}
+
+
+async function loadCatalogTable() {
+	log('loadCatalogTable');
+	const tableContainer = document.querySelector('#table-container');
+	const catalogName = tableContainer.dataset.catalog;
+	log(catalogName);
+	const catalog = await getCatalog(catalogName);
+	log(catalog);
+	const specInfo = await getSpecInfo(catalogName);
+	log(specInfo);
+
+	const table = document.querySelector('#catalog-table');
+	const thead = document.createElement('thead');
+	const headRow = document.createElement('tr');
+	const select = document.createElement('th');
+	select.textContent = 'Select'
+	headRow.appendChild(select);
+	const view = document.createElement('th');
+	view.textContent = 'View'
+	headRow.appendChild(view);
+	const name = document.createElement('th');
+	name.textContent = 'Name';
+	headRow.appendChild(name);
+
+	const nameColumn = catalog.data_model.name_column;
+	for (const field of catalog.data_model.fields) {
+		const fieldHead = document.createElement('th');
+		fieldHead.textContent = field.name;
+		headRow.appendChild(fieldHead);
+	}
+
+	for (const line of catalog.data_model.features.lines) {
+		for (const attr of catalog.data_model.features.attributes) {
+			const colName = resolveColumn(catalog.data_model.features.column_format, line.name, attr.name);
+			const attrHead = document.createElement('th');
+			attrHead.textContent = colName;
+			headRow.appendChild(attrHead);
+		}
+	}
+
+	thead.appendChild(headRow);
+	table.appendChild(thead);
+
+	const tbody = document.createElement('tbody');
+	for (const spec of specInfo) {
+		log(spec);
+		const specName = spec[nameColumn];
+		log(specName);
+		const row = document.createElement('tr');
+
+		const selectBox = document.createElement('input');
+		selectBox.type = 'checkbox';
+		const selectField = document.createElement('td');
+		selectField.appendChild(selectBox);
+		row.appendChild(selectField);
+
+		const link = document.createElement('a');
+		link.href = '/spec-viewer/'+catalog.slug+'/'+specName;
+		link.textContent = 'View';
+		log(link.href);
+		const linkField = document.createElement('td');
+		linkField.appendChild(link);
+		row.appendChild(linkField);
+
+		const nameField = document.createElement('td');
+		nameField.textContent = specName;
+		row.appendChild(nameField);
+
+		for (const field of catalog.data_model.fields) {
+			const fieldField = document.createElement('td');
+			fieldField.textContent = spec[field.column];
+			row.appendChild(fieldField);
+		}
+
+		for (const line of catalog.data_model.features.lines) {
+			for (const attr of catalog.data_model.features.attributes) {
+				const colName = resolveColumn(catalog.data_model.features.column_format, line.name, attr.name);
+				const attrField = document.createElement('td');
+				attrField.textContent = spec[colName];
+				row.appendChild(attrField);
+			}
+		}
+
+		tbody.appendChild(row);
+	}
+
+	table.appendChild(tbody);
+}
+
+
 registerComponent('catalog-chooser', loadCatalogChooser);
 registerComponent('catalog-creator', loadCatalogCreator);
+registerComponent('catalog-table', loadCatalogTable);

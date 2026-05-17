@@ -126,8 +126,8 @@ class DataModel:
 
 TestModel = DataModel(name='Basic', name_column='spec_name',
 	fields=[
-		DataField(name='ra', column='RA', units='deg'),
-		DataField(name='dec', column='DEC', units='deg'),
+		DataField(name='RA', column='ra', units='deg'),
+		DataField(name='DEC', column='dec', units='deg'),
 		DataField(name='z', column='z'),
 	],
 	features=DataFeatures(

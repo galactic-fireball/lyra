@@ -83,24 +83,37 @@ export async function getActivityHTML(activity) {
 }
 
 
-export async function getSpecData(catalog, spec_name) {
+export async function getSpecData(catalog, specName) {
 	const url = urlFor('api.spec_data');
-	const res = await fetchWithParams(url, {catalog:catalog,spec_name:spec_name});
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:specName});
 	return res.json();
 }
 
 
-export async function getNextSpecData(catalog, spec_name) {
-	const url = urlFor('api.spec_data');
-	const res = await fetchWithParams(url, {catalog:catalog,spec_name:spec_name,mode:'next'});
+export async function getSpecInfo(catalog, specName=null) {
+	const url = urlFor('api.spec_info');
+	const params = {catalog:catalog};
+	if (specName !== null) {
+		params.spec_name = specName;
+	}
+
+	const res = await fetchWithParams(url, params);
 	if (!res) { return null; }
 	return res.json();
 }
 
 
-export async function getPrevSpecData(catalog, spec_name) {
+export async function getNextSpecData(catalog, specName) {
 	const url = urlFor('api.spec_data');
-	const res = await fetchWithParams(url, {catalog:catalog,spec_name:spec_name,mode:'prev'});
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:specName,mode:'next'});
+	if (!res) { return null; }
+	return res.json();
+}
+
+
+export async function getPrevSpecData(catalog, specName) {
+	const url = urlFor('api.spec_data');
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:specName,mode:'prev'});
 	if (!res) { return null; }
 	return res.json();
 }

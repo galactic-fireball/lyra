@@ -8,6 +8,7 @@
     --text-color-subtle: rgba(230,237,247,0.2);
     --trim-color: #9fb3d9;
     --trim-color-subtle: rgba(159,179,217,0.2);
+    --trim-color-dark: #506eaf;
     --rblue: #108ab1;
     --rgreen: #06d7a0;
     --ryellow: #ffd167;
@@ -130,7 +131,7 @@ table {
         position: sticky;
         top: 0;
         z-index: 50;
-        background: var(--trim-color);
+        background: var(--trim-color-dark);
         color: var(--dark-primary);
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -162,7 +163,7 @@ table {
     }
 
     tr:hover {
-        background: var(--trim-color);
+        background: var(--trim-color-dark);
         color: var(--dark-primary);
 
         & td a {

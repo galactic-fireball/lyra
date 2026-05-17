@@ -79,6 +79,18 @@ class Catalog(BaseModel):
 		return self._mdf[name_col].values
 
 
+	def get_spectra_info(self, spec_name=None):
+		if self._mdf is None:
+			return []
+		if spec_name is None:
+			return self._mdf.to_dict(orient='records')
+		res = self._mdf[self._mdf[self.data_model.name_column] == spec_name]
+		if len(res) != 1:
+			print('unexpected result count: %d'%len(res))
+			return []
+		return res.iloc[0].to_dict(orient='records')
+
+
 	def get_spectrum(self, spec_name):
 		spec_file = self.repository.joinpath('%s.fits'%spec_name)
 		if not spec_file.exists():

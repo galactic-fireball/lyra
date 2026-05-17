@@ -45,6 +45,19 @@ def spec_data():
 	return jsonify(serialize(spectrum.to_dict()))
 
 
+@api.route('spec-info')
+def spec_info():
+	catalog_slug = request.args.get('catalog')
+	spec_name = request.args.get('spec_name', None)
+
+	cat = Catalog.from_name(catalog_slug)
+	if not cat:
+		print('Catalog %s not found'%catalog_slug)
+		return {'error': 'Catalog not found'}, 404
+
+	return jsonify(cat.get_spectra_info(spec_name=spec_name))
+
+
 @api.route('activity')
 def activity():
 	activity = request.args.get('activity')
