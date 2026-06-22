@@ -90,6 +90,22 @@ export async function getSpecData(catalog, specName) {
 }
 
 
+export async function getSpaxelData(catalog, specName, x, y) {
+	const url = urlFor('api.spaxel_data');
+	log('fetching...');
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:specName,x:x,y:y});
+	log('returning...');
+	return res.json();
+}
+
+
+export async function getSpecMap(catalog, specName, mapType) {
+	const url = urlFor('api.spec_map');
+	const res = await fetchWithParams(url, {catalog:catalog,spec_name:specName,map_type:mapType});
+	return res.json();
+}
+
+
 export async function getSpecInfo(catalog, specName=null) {
 	const url = urlFor('api.spec_info');
 	const params = {catalog:catalog};

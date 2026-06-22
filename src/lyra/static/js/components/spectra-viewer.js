@@ -5,7 +5,7 @@ const TRANSPARENT = 'rgba(0,0,0,0)'
 
 export class SpectraViewer {
 
-	static viewerID = 'plotly-container';
+	static viewerID = 'sv-plotly-container';
 
 	static nodata_layout = {
 		title: {text: '', subtitle: {text: ''}},
@@ -98,6 +98,7 @@ export class SpectraViewer {
 
 
 	reloadPlot() {
+		log('spec-viewer reloadPlot');
 		showLoading();
 		var plotTraces = [];
 
@@ -180,7 +181,7 @@ export class SpectraViewer {
 		};
 
 		var config = { responsive: true, };
-		Plotly.react(SpectraViewer.viewerID, plotTraces, layout, config);
+		Plotly.react(SpectraViewer.viewerID, plotTraces, layout);//, config);
 		hideLoading();
 	}
 }

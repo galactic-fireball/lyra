@@ -1,6 +1,6 @@
 import { log, showLoading, hideLoading } from '../utils.js';
 import { registerComponent, getComponent } from './registry.js';
-import { getCatalog, getActivityHTML, getSpecData, getNextSpecData, getPrevSpecData, getFeatures, sendActivityData } from '../api.js';
+import { getCatalog, getActivityHTML, getSpecData, getSpecMap, getSpaxelData, getNextSpecData, getPrevSpecData, getFeatures, sendActivityData } from '../api.js';
 
 
 const ACTIVITIES = new Map();
@@ -9,11 +9,10 @@ const ACTIVITIES = new Map();
 export class ActivityController {
 
 	constructor() {
-		log('new ActivityController')
-		this.viewer = getComponent('spectra-viewer');
-		log(this.viewer);
-		// this.currentActivityName = 'view';
-		this.currentActivityName = 'feat-verify'
+		log('new ActivityController');
+		this.specViewer = getComponent('spectra-viewer');
+		this.mapViewer = getComponent('map-viewer');
+		this.currentActivityName = 'view';
 		this.currentActivity = null;
 		const controllerElem = document.querySelector('#activity-controller');
 		this.controllerElem = controllerElem
@@ -34,7 +33,19 @@ export class ActivityController {
 		log('CATALOG');
 		log(ac.currentCatalog);
 		ac.initActivitySwitcher();
-		await ac.setSpecData();
+
+		log('mapViewer');
+		log(ac.mapViewer);
+
+		if (ac.mapViewer !== null) {
+			log('mapViewer is here');
+			ac.specViewer.setNoDataPlot()
+			await ac.setMapData();
+		} else {
+			log('would call setSpecData, no mapViewer');
+			await ac.setSpecData();
+		}
+
 		await ac.initializePanel();
 		hideLoading();
 		return ac;
@@ -78,7 +89,12 @@ export class ActivityController {
 
 		this.currentActivity = new activityClass(this);
 		this.currentActivity.initialize();
-		this.currentActivity.updateViewer();
+		this.currentActivity.updateViewers();
+	}
+
+	async setMapData() {
+		log('setMapData');
+		this.currentMap = await getSpecMap(this.currentCatalog.slug, this.currentSpecName, 'median');
 	}
 
 	async setSpecData() {
@@ -88,10 +104,16 @@ export class ActivityController {
 		log(this.currentSpec);
 	}
 
+	async setSpaxelData(x, y) {
+		log('setSpaxelData');
+		this.currentSpec = await getSpaxelData(this.currentCatalog.slug, this.currentSpecName, x, y);
+		log(this.currentSpec);
+	}
+
 	async nextSpec() {
 		showLoading();
 		this.currentSpec = await getNextSpecData(this.currentCatalog, this.currentSpecName);
-		if (!this.currentSpec) { this.viewer.setNoDataPlot(); hideLoading(); return; }
+		if (!this.currentSpec) { this.specViewer.setNoDataPlot(); hideLoading(); return; }
 
 		this.currentSpecName = this.currentSpec.name;
 		this.updatePanel();
@@ -102,7 +124,7 @@ export class ActivityController {
 	async prevSpec() {
 		showLoading();
 		this.currentSpec = await getPrevSpecData(this.currentCatalog, this.currentSpecName);
-		if (!this.currentSpec) { this.viewer.setNoDataPlot(); hideLoading(); return; }
+		if (!this.currentSpec) { this.specViewer.setNoDataPlot(); hideLoading(); return; }
 
 		this.currentSpecName = this.currentSpec.name;
 		this.updatePanel();
@@ -116,15 +138,29 @@ export class ActivityController {
 	}
 
 	updatePanel() {
-		this.currentActivity.updateViewer();
+		this.currentActivity.updateSpecViewer();
 	}
 
-	updateViewer() {
-		if (!this.currentSpec) { this.viewer.setNoDataPlot(); return; }
+	updateSpecViewer() {
+		if (!this.currentSpec) { this.specViewer.setNoDataPlot(); return; }
 
-		this.viewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.target.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.target.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.target.z.toFixed(4));
-		this.viewer.setWaveArray(this.currentSpec.wave);
-		this.viewer.addData(this.currentSpec.flux, this.currentSpec.err);
+		this.specViewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.target.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.target.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.target.z.toFixed(4));
+		this.specViewer.setWaveArray(this.currentSpec.wave);
+		this.specViewer.addData(this.currentSpec.flux, this.currentSpec.err);
+	}
+
+	updateMapViewer() {
+		log('updateMapViewer');
+		if (!this.mapViewer) { return; }
+		log('updateMapViewer viewer good')
+		// if (!this.currentSpec) { this.mapViewer.setNoDataPlot(); return; }
+		if (!this.currentMap) { this.mapViewer.setNoDataPlot(); return; }
+		log('updateMapViewer map good')
+
+		// this.mapViewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.target.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.target.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.target.z.toFixed(4));
+		this.mapViewer.setTitle('SPEC NAME', 'SPEC INFO');
+		this.mapViewer.setData(this.currentMap);
+		log('updateMapViewer data set');
 	}
 }
 
@@ -136,16 +172,29 @@ class Activity {
 
 	constructor(controller) {
 		this.controller = controller
-		this.viewer = controller.viewer;
+		this.specViewer = controller.specViewer;
+		this.mapViewer = controller.mapViewer;
 	}
 
 	initialize() {}
 
 	setupHotKeys() {}
 
-	updateViewer() {
-		this.controller.updateViewer();
+	updateViewers() {
+		log('updateViewers');
+		this.updateMapViewer();
+		this.updateSpecViewer();
 	}
+
+	updateSpecViewer() {
+		this.controller.updateSpecViewer();
+	}
+
+	updateMapViewer() {
+		this.controller.updateMapViewer();
+	}
+
+	onMapClick(eventData) {}
 }
 
 
@@ -156,9 +205,28 @@ class ViewActivity extends Activity {
 		super(controller);
 	}
 
-	updateViewer() {
-		super.updateViewer();
-		this.viewer.reloadPlot();
+	updateSpecViewer() {
+		super.updateSpecViewer();
+		if (!this.controller.currentSpec) { return; }
+		this.specViewer.reloadPlot();
+	}
+
+	updateMapViewer() {
+		super.updateMapViewer();
+		if (!this.controller.currentMap) { return; }
+		this.mapViewer.addClickHandler((eventData) => this.onMapClick(eventData));
+		this.mapViewer.reloadPlot();
+	}
+
+	async onMapClick(eventData) {
+		log('onMapClick');
+		log(eventData);
+		showLoading();
+		var point = eventData.points[0];
+		log('X = ' + point.x + ', Y = ' + point.y);
+		await this.controller.setSpaxelData(point.x, point.y);
+		this.updateSpecViewer();
+		hideLoading();
 	}
 }
 ACTIVITIES.set('view', ViewActivity);
@@ -190,7 +258,7 @@ class FeatureVerifyActivity extends Activity {
 
 		featSelector.addEventListener('change', (event) => {
 			this.currentFeature = event.target.value;
-			this.updateViewer();
+			this.updateSpecViewer();
 		});
 
 		document.addEventListener('keydown', (event) => { this.handleKeyDown(event); });
@@ -223,15 +291,15 @@ class FeatureVerifyActivity extends Activity {
 	}
 
 
-	updateViewer() {
-		super.updateViewer();
-		this.viewer.removeAllFeatures();
+	updateSpecViewer() {
+		super.updateSpecViewer();
+		this.specViewer.removeAllFeatures();
 
 		if (this.currentFeature) {
-			this.viewer.addFeature(this.currentFeature, this.features.get(this.currentFeature));
+			this.specViewer.addFeature(this.currentFeature, this.features.get(this.currentFeature));
 		}
 
-		this.viewer.reloadPlot();
+		this.specViewer.reloadPlot();
 	}
 }
 ACTIVITIES.set('feat-verify', FeatureVerifyActivity);

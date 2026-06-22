@@ -58,6 +58,49 @@ def spec_info():
 	return jsonify(cat.get_spectra_info(spec_name=spec_name))
 
 
+@api.route('spec-map')
+def spec_map():
+	catalog_slug = request.args.get('catalog')
+	spec_name = request.args.get('spec_name')
+	map_type = request.args.get('map_type')
+
+	cat = Catalog.from_name(catalog_slug)
+	if not cat:
+		print('Catalog %s not found'%catalog_slug)
+		return {'error': 'Catalog not found'}, 404
+
+	smap = cat.get_spectrum_map(spec_name, map_type).value / 1e-18
+	if smap is None:
+		print('Spectrum %s not found or type invalid'%spec_name)
+		return {'error': 'Spectrum not found'}, 404
+
+	return jsonify(serialize(smap))
+
+
+@api.route('spaxel-data')
+def spaxel_data():
+	print('spaxel_data')
+	catalog_slug = request.args.get('catalog')
+	spec_name = request.args.get('spec_name')
+	x = int(request.args.get('x'))
+	y = int(request.args.get('y'))
+
+	cat = Catalog.from_name(catalog_slug)
+	if not cat:
+		print('Catalog %s not found'%catalog_slug)
+		return {'error': 'Catalog not found'}, 404
+	print('got cat')
+
+	spax = cat.get_spec_spaxel_data(spec_name, x, y)
+	if spax is None:
+		print('Spaxel %s not found'%spec_name)
+		return {'error': 'Spaxel not found'}, 404
+	print('got spax')
+
+	return jsonify(serialize(spax.to_dict()))
+
+
+
 @api.route('activity')
 def activity():
 	activity = request.args.get('activity')

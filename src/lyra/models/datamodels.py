@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass, field
 from typing import ClassVar
 # import numpy as np
 # import numpy.typing as npt
-# import pandas as pd
+import pandas as pd
 # import pathlib
 # from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator, PlainSerializer
 # import toml
@@ -105,6 +105,14 @@ class DataModel:
 		if len(DataModel.models) == 1 and 'Empty' in DataModel.models:
 			[DataModel(**model_data) for model_data in load_models()]
 		return DataModel.models
+
+
+	def create_manifest(self,out_dir):
+		all_fits = out_dir.glob('*.fits')
+		df = pd.DataFrame({self.name_column:[f.stem for f in all_fits]})
+		manifest_file = out_dir.joinpath('manifest.csv')
+		df.to_csv(manifest_file, index=False)
+		return manifest_file
 
 
 	def to_dict(self):

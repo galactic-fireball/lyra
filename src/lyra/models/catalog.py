@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import ClassVar
 
 from spark.io import load_spectral_product
+from spark.io.models import SparkSpec, SparkCube
 
 from lyra.models import DataModel, EmptyModel
 from lyra.store.models import store_catalog, load_catalog, load_catalogs
@@ -21,19 +22,24 @@ class Catalog(BaseModel):
 	repository: str | pathlib.Path = Field(None, description='Storage repository of catalog spectra data')
 
 	_mdf: pd.DataFrame = None
+	_spec_cache: dict = {}
 
 	@model_validator(mode='after')
 	def setup(self):
 		self.slug = self.name.replace(' ', '-')
 
-		if isinstance(self.manifest, str):
-			self.manifest = pathlib.Path(self.manifest)
 		if isinstance(self.repository, str):
 			self.repository = pathlib.Path(self.repository)
 
 		if isinstance(self.data_model, str):
 			self.data_model = DataModel.from_name(self.data_model)
 
+		if self.manifest is None or self.manifest == '':
+			self.manifest = self.data_model.create_manifest(self.repository)
+		if isinstance(self.manifest, str):
+			self.manifest = pathlib.Path(self.manifest)
+
+		print(self.manifest)
 		if self.manifest:
 			self._mdf = pd.read_csv(self.manifest)
 
@@ -91,13 +97,60 @@ class Catalog(BaseModel):
 		return res.iloc[0].to_dict(orient='records')
 
 
+	# TODO: make a separate models/spectrum and models/cube to handle these
 	def get_spectrum(self, spec_name):
+		print('spec_name: %s'%spec_name)
+
+		if spec_name in self._spec_cache:
+			return self._spec_cache[spec_name]
+
 		spec_file = self.repository.joinpath('%s.fits'%spec_name)
 		if not spec_file.exists():
 			print('Could not find request spectrum: %s'%str(spec_file))
 			return None
 
-		return load_spectral_product(spec_file, 'SDSS', name=spec_file.stem)
+		self._spec_cache[spec_name] = load_spectral_product(spec_file, 'MIRI_MRS', name=spec_file.stem)
+		return self._spec_cache[spec_name]
+
+
+	def get_spectrum_map(self, spec_name, map_type):
+		print('get_spectrum_map')
+		spec = self.get_spectrum(spec_name)
+		if spec is None:
+			print('Could not find request spectrum: %s'%str(spec_file))
+			return None
+
+		if not isinstance(spec, SparkCube):
+			print('maps only available for data cubes')
+			return None
+
+		if map_type != 'median':
+			print('Only median maps currently supported')
+			return None
+
+		return spec.get_median_map()
+
+
+	def get_spec_spaxel_data(self, spec_name, x, y):
+		print('get_spec_spaxel_data')
+		spec = self.get_spectrum(spec_name)
+		if spec is None:
+			print('Could not find request spectrum: %s'%str(spec_file))
+			return None
+		print('got spec')
+
+		if not isinstance(spec, SparkCube):
+			print('spaxels only available for data cubes')
+			return None
+
+		spax = spec.spax(x,y)
+		print('got spax')
+		# TODO: better workaround
+		spax.flux = spax.flux.value
+		spax.err = spax.err.value
+		spax.wave = spax.wave.value
+		print('returning')
+		return spax
 
 
 # class SurveyCollection(Collection):

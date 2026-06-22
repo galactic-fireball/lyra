@@ -7,10 +7,19 @@
 {% block content %}
 
 <div class="dialog-box full-viewer-container">
-	<div data-component="spectra-viewer" id="spectra-viewer">
-		<div class="viewer-container">
-			<div class="plot-wrapper">
-				<div id="sv-plotly-container" class="plotly-container"></div>
+	<div class="plot-layout-40-60">
+		<div data-component="map-viewer" id="map-viewer">
+			<div class="viewer-container">
+				<div class="plot-wrapper">
+					<div id="mv-plotly-container" class="plotly-container"></div>
+				</div>
+			</div>
+		</div>
+		<div data-component="spectra-viewer" id="spectra-viewer">
+			<div class="viewer-container">
+				<div class="plot-wrapper">
+					<div id="sv-plotly-container" class="plotly-container"></div>
+				</div>
 			</div>
 		</div>
 	</div>
