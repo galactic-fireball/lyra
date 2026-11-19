@@ -100,22 +100,34 @@ export class SpectraViewer {
 	reloadPlot() {
 		log('spec-viewer reloadPlot');
 		showLoading();
-		var plotTraces = [];
 
+		const waveMin = Math.max(Math.min(...this.wave), this.userWaveMin);
+		const waveMax = Math.min(Math.max(...this.wave), this.userWaveMax);
+		log(waveMin+'-'+waveMax);
+
+
+		let y0 = 100;
+		let y1 = -100;
+		const plotMask = this.wave.map(w => (w >= waveMin && w <= waveMax));
+		const plotWave = this.wave.filter((_,i) => plotMask[i]);
+
+		var plotTraces = [];
 		// Add noise if available (and data is as well)
 		if (this.noise && this.data) {
+			const plotNoise0 = this.noise[0].filter((_,i) => plotMask[i]);
 			plotTraces.push({
-				x: this.wave,
-				y: this.noise[0],
+				x: plotWave,
+				y: plotNoise0,
 				mode: 'lines',
 				line: {width:0},
 				showlegend: false,
 				hoverinfo: 'skip',
 			});
 
+			const plotNoise1 = this.noise[1].filter((_,i) => plotMask[i]);
 			plotTraces.push({
-				x: this.wave,
-				y: this.noise[1],
+				x: plotWave,
+				y: plotNoise1,
 				mode: 'lines',
 				fill: 'tonexty',
 				fillcolor: cssVar('--text-color-subtle'),
@@ -127,9 +139,15 @@ export class SpectraViewer {
 
 		// Add data if available
 		if (this.data) {
+			const plotData = this.data.filter((_,i) => plotMask[i]);
+			const spec_min = Math.min(...plotData);
+			const spec_max = Math.max(...plotData);
+			y0 = Math.min(y0, spec_min-(spec_max*0.1));
+			y1 = Math.max(y1, spec_max+(spec_max*0.1));
+
 			plotTraces.push({
-				x: this.wave,
-				y: this.data,
+				x: plotWave,
+				y: plotData,
 				type: 'scatter',
 				mode: 'lines',
 				marker: {color: cssVar('--trim-color')},
@@ -138,26 +156,21 @@ export class SpectraViewer {
 		}
 
 		for (const [traceName,traceData] of this.traces) {
+			const plotTrace = traceData.filter((_,i) => plotMask[i]);
+			const spec_min = Math.min(...plotTrace);
+			const spec_max = Math.max(...plotTrace);
+			y0 = Math.min(y0, spec_min-(spec_max*0.1));
+			y1 = Math.max(y1, spec_max+(spec_max*0.1));
+
 			plotTraces.push({
-				x: this.wave,
-				y: traceData,
+				x: plotWave,
+				y: plotTrace,
 				type: 'scatter',
 				mode: 'lines',
 				marker: {color: cssVar('--trim-color')},
 				name: traceName,
 			});
 		}
-
-
-		const waveMin = Math.max(Math.min(...this.wave), this.userWaveMin);
-		const waveMax = Math.min(Math.max(...this.wave), this.userWaveMax);
-		log(waveMin+'-'+waveMax);
-
-		// TODO: find the min and max of all components
-		const spec_min = Math.min(...this.data);
-		const spec_max = Math.max(...this.data);
-		const y0 = spec_min-(spec_max*0.1);
-		const y1 = spec_max+(spec_max*0.1);
 
 		var vlines = []
 		log(this.features);
@@ -174,7 +187,7 @@ export class SpectraViewer {
 			paper_bgcolor: TRANSPARENT,
 			plot_bgcolor: TRANSPARENT,
 			font: {color: cssVar('--text-color'), size:16},
-			xaxis: {range: [waveMin,waveMax], title: {text:'λ rest (Å)'}, gridcolor: cssVar('--text-color-subtle')}, // color:colors['pale-green']}},
+			xaxis: {title: {text:'λ rest (Å)'}, gridcolor: cssVar('--text-color-subtle')}, // color:colors['pale-green']}},
 			yaxis: {title: {text:'f_λ (10^-17 erg s^-1 cm^-2 Å^-1)'}, gridcolor: cssVar('--text-color-subtle')}, // color:colors['pale-green']}},
 			shapes: vlines,
 			legend: {orientation:'h'}

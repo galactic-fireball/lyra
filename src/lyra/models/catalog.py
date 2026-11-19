@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pathlib
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -109,8 +110,44 @@ class Catalog(BaseModel):
 			print('Could not find request spectrum: %s'%str(spec_file))
 			return None
 
-		self._spec_cache[spec_name] = load_spectral_product(spec_file, 'MIRI_MRS', name=spec_file.stem)
+		self._spec_cache[spec_name] = load_spectral_product(spec_file, self.data_model.instrument, name=spec_file.stem)
 		return self._spec_cache[spec_name]
+
+
+	def get_next_spectrum(self, cur_spec_name):
+		if self._mdf is None:
+			return None
+
+		idx = self._mdf[self._mdf[self.data_model.name_column] == cur_spec_name].iloc[0].name
+		if idx >= len(self._mdf)-1:
+			return None
+
+		return self.get_spectrum(self._mdf.iloc[idx+1][self.data_model.name_column])
+
+
+	def get_prev_spectrum(self, cur_spec_name):
+		if self._mdf is None:
+			return None
+
+		idx = self._mdf[self._mdf[self.data_model.name_column] == cur_spec_name].iloc[0].name
+		if idx <= 0:
+			return None
+
+		return self.get_spectrum(self._mdf.iloc[idx-1][self.data_model.name_column])
+
+
+	def mark_manifest_data(self, **kwargs):
+		spec_name = kwargs.get('spec_name', None)
+		data_col = kwargs.get('data_col', None)
+		data_val = kwargs.get('data_val', None)
+
+		if (spec_name is None) or (data_col is None) or (data_val is None):
+			print('Missing data argument')
+			return False
+
+		self._mdf.loc[self._mdf[self.data_model.name_column] == spec_name, data_col] = data_val
+		self._mdf.to_csv(self.manifest, index=False)
+		return True
 
 
 	def get_spectrum_map(self, spec_name, map_type):

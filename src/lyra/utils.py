@@ -4,12 +4,15 @@ import numpy as np
 import pathlib
 
 def serialize(obj):
+	# print('serializing: %s'%str(obj))
 	if isinstance(obj, (str,int,float,bool)):
 		return obj
 	if obj is None:
 		return obj
 	if isinstance(obj, WCS):
 		return str(obj)
+	if isinstance(obj, u.Quantity):
+		return serialize(obj.value)
 	if isinstance(obj, (tuple,list,np.ndarray)):
 		if isinstance(obj, np.ndarray) and obj.shape == ():
 			return str(obj)

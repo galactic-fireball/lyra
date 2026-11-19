@@ -116,6 +116,7 @@ input.form-item, select.form-item {
     box-shadow: var(--default-shadow);
     border: 2px solid transparent;
     background: linear-gradient(var(--dark-second), var(--dark-second)) padding-box, var(--rgradient) border-box;
+    margin-top: 10px;
 }
 
 

@@ -112,7 +112,7 @@ export class ActivityController {
 
 	async nextSpec() {
 		showLoading();
-		this.currentSpec = await getNextSpecData(this.currentCatalog, this.currentSpecName);
+		this.currentSpec = await getNextSpecData(this.currentCatalog.slug, this.currentSpecName);
 		if (!this.currentSpec) { this.specViewer.setNoDataPlot(); hideLoading(); return; }
 
 		this.currentSpecName = this.currentSpec.name;
@@ -123,7 +123,7 @@ export class ActivityController {
 
 	async prevSpec() {
 		showLoading();
-		this.currentSpec = await getPrevSpecData(this.currentCatalog, this.currentSpecName);
+		this.currentSpec = await getPrevSpecData(this.currentCatalog.slug, this.currentSpecName);
 		if (!this.currentSpec) { this.specViewer.setNoDataPlot(); hideLoading(); return; }
 
 		this.currentSpecName = this.currentSpec.name;
@@ -133,7 +133,7 @@ export class ActivityController {
 	}
 
 	updateURL(specName) {
-		const newUrl = '/spec-viewer/' + this.currentCatalog + '/' + this.currentSpecName;
+		const newUrl = '/spec-viewer/' + this.currentCatalog.slug + '/' + this.currentSpecName;
 		history.pushState({spec: this.currentSpecName}, '', newUrl);
 	}
 
@@ -255,6 +255,7 @@ class FeatureVerifyActivity extends Activity {
 			option.textContent = feat.name
 			featSelector.appendChild(option);
 		}
+		this.currentFeature = features[0].name;
 
 		featSelector.addEventListener('change', (event) => {
 			this.currentFeature = event.target.value;

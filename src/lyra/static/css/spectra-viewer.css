@@ -1,25 +1,50 @@
 .full-viewer-container {
     width: 96vw;
+    /*height: 80vh;*/
+    justify-self: center;
 }
 
-.plot-layout-40-60 {
-    display: grid;
-    grid-template-columns: 1fr 5fr;
+.split-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    /*align-items: center;*/
+}
+
+.split-panel {
+    min-width: 200px;
+    overflow: hidden;
+}
+
+.splitter {
+    width: 6px;
+    cursor: col-resize;
+    background: var(--trim-color-subtle);
+    flex-shrink: 0;
+
+    &:hover {
+        background: var(--trim-color);
+    }
 }
 
 #spectra-viewer {
     justify-self: center;
     padding: 10px;
     margin: 10px;
+    width: 100%;
+    /*flex-basis: 60%;*/
 }
 
 #map-viewer {
     justify-self: center;
     padding: 10px;
     margin: 10px;
+    flex-basis: 40%;
 }
 
-.viewer-container {}
+.viewer-container {
+    /*align-self: center;*/
+}
 
 .plot-wrapper {
     border-radius: 30px;
@@ -29,7 +54,9 @@
 }
 
 .plotly-container {
-    height: 75vh;
+    /*height: 75vh;*/
+    width: 100%;
+    height: 100%;
     background: var(--dark-primary);
     color: var(--text-color);
 }

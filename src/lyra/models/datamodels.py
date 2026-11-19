@@ -57,6 +57,7 @@ class DataModel:
 
 	name: str
 	name_column: str
+	instrument: str
 	fields: list[DataField] = field(default_factory=list)
 	features: DataFeatures = None
 
@@ -132,7 +133,7 @@ class DataModel:
 		json_store(self, file_name, store=DATA_MODEL_STORE)
 
 
-TestModel = DataModel(name='Basic', name_column='spec_name',
+TestModel = DataModel(name='Basic', name_column='spec_name', instrument='SDSS',
 	fields=[
 		DataField(name='RA', column='ra', units='deg'),
 		DataField(name='DEC', column='dec', units='deg'),
@@ -151,7 +152,7 @@ TestModel = DataModel(name='Basic', name_column='spec_name',
 	),
 )
 
-EmptyModel = DataModel(name='Empty', name_column='name', fields=[],features={})
+EmptyModel = DataModel(name='Empty', name_column='name', instrument='', fields=[],features={})
 
 
 # def main():
