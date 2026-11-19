@@ -15,6 +15,7 @@ dependencies = [
     "astropy (>=7.2.0,<8.0.0)",
     "pandas (>=3.0.1,<4.0.0)",
     "spark @ file:///Users/sara/Dropbox/side_quests/portfolio/spark",
+    "dust-extinction (>=1.7,<2.0)",
 ]
 
 [tool.poetry]
