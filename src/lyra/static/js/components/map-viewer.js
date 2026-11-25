@@ -19,7 +19,10 @@ export class MapViewer {
 		this.title = '';
 		this.subtitle = '';
 		this.data = null;
-		this.clickHandlers = [];
+		this.focus = {x:0, y:0};
+		this.nx = 0;
+		this.ny = 0;
+		this.changeHandlers = [];
 
 		// TODO: apertures
 		// TODO: spaxel markers
@@ -28,7 +31,7 @@ export class MapViewer {
 		showLoading();
 		this.initPlotViewer();
 		const viewerElem = document.getElementById(MapViewer.viewerID);
-		viewerElem.on('plotly_click', (eventData) => { this.clickHandlers.forEach(func => func(eventData)); });
+		viewerElem.on('plotly_click', (event) => { this.onMapClick(event); });
 		hideLoading();
 	}
 
@@ -36,8 +39,32 @@ export class MapViewer {
 		Plotly.newPlot(MapViewer.viewerID, [{z:[[2,3],[3,4]],type:'heatmap'}], MapViewer.nodata_layout, {responsive:true});
 	}
 
-	addClickHandler(func) {
-		this.clickHandlers.push(func);
+	handleKeyDown(event) {
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { return; }
+
+		if (event.key === 'ArrowUp') { this.updateFocus(this.focus.x, this.focus.y+1); }
+		else if (event.key === 'ArrowDown') { this.updateFocus(this.focus.x, this.focus.y-1); }
+		else if (event.key === 'ArrowLeft') { this.updateFocus(this.focus.x-1, this.focus.y); }
+		else if (event.key === 'ArrowRight') { this.updateFocus(this.focus.x+1, this.focus.y); }
+	}
+
+	onMapClick(event) {
+		if (event?.points?.length) {
+			this.updateFocus(event.points[0].x, event.points[0].y);
+		}
+	}
+
+	updateFocus(x, y) {
+		this.focus.x = Math.max(0, Math.min(this.nx-1,Math.round(x)));
+		this.focus.y = Math.max(0, Math.min(this.ny-1,Math.round(y)));
+		log(this.focus);
+		this.reloadPlot();
+
+		this.changeHandlers.forEach(func => { func(this.focus); });
+	}
+
+	addSpaxelChangeHandler(func) {
+		this.changeHandlers.push(func);
 	}
 
 	setTitle(title, subtitle='') {
@@ -45,16 +72,14 @@ export class MapViewer {
 		this.subtitle = subtitle;
 	}
 
-
 	setData(data) {
 		// this.data = data;
 		this.data = data.map(row => row.map(val => Math.log10(val)));
+		this.ny = this.data.length;
+		this.nx = this.data[0].length;
 	}
 
-
 	reloadPlot() {
-		log('map-viewer reloadPlot');
-		log(this.data);
 		showLoading();
 		var layout = {
 			title: {text: this.title, subtitle: {text: this.subtitle}},
@@ -64,13 +89,25 @@ export class MapViewer {
 			font: {color: cssVar('--text-color'), size:16},
 			xaxis: {title: {text:'X (px)'}, gridcolor: cssVar('--text-color-subtle'), autoresize: true},
 			yaxis: {title: {text:'Y (px)'}, gridcolor: cssVar('--text-color-subtle'), autoresize: true},
+			clickmode: 'event+select',
+			autosize: true, margin: {l:30,r:10,t:30,b:35,pad:1}
 		};
-		Plotly.react(MapViewer.viewerID, [{z:this.data, type:'heatmap', colorscale:'Rainbow'}], layout);
+
+		const heatmap = {z:this.data, type:'heatmap', colorscale:'Rainbow'};
+		const focusBox = {
+			type: 'scatter', mode: 'markers',
+			x: [this.focus.x], y: [this.focus.y],
+			marker: {
+				symbol: 'x-thin', color: '#ffffff',
+				line: { color: '#ffffff', width: 1.0 },
+			},
+			hoverinfo: 'skip', showlegend: false
+		};
+		Plotly.react(MapViewer.viewerID, [heatmap, focusBox], layout);
 		hideLoading();
 	}
 }
 
-log('MAP VIEWER JS LOADED');
 registerComponent('map-viewer', () => new MapViewer());
 
 

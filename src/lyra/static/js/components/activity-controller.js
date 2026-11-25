@@ -2,6 +2,7 @@ import { log, showLoading, hideLoading } from '../utils.js';
 import { registerComponent, getComponent } from './registry.js';
 import { getCatalog, getActivityHTML, getSpecData, getSpecMap, getSpaxelData, getNextSpecData, getPrevSpecData, getFeatures, sendActivityData } from '../api.js';
 
+const ARROWS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
 const ACTIVITIES = new Map();
 
@@ -9,7 +10,6 @@ const ACTIVITIES = new Map();
 export class ActivityController {
 
 	constructor() {
-		log('new ActivityController');
 		this.specViewer = getComponent('spectra-viewer');
 		this.mapViewer = getComponent('map-viewer');
 		this.currentActivityName = 'view';
@@ -28,23 +28,18 @@ export class ActivityController {
 	static async initialize() {
 		showLoading();
 		const ac = new ActivityController();
-		log(ac);
 		ac.currentCatalog = await getCatalog(ac.currentCatalogName);
-		log('CATALOG');
-		log(ac.currentCatalog);
 		ac.initActivitySwitcher();
 
-		log('mapViewer');
-		log(ac.mapViewer);
-
 		if (ac.mapViewer !== null) {
-			log('mapViewer is here');
 			ac.specViewer.setNoDataPlot()
 			await ac.setMapData();
+			ac.mapViewer.addSpaxelChangeHandler((spaxel) => ac.onMapChange(spaxel));
 		} else {
-			log('would call setSpecData, no mapViewer');
 			await ac.setSpecData();
 		}
+
+		document.addEventListener('keydown', (event) => ac.handleKeyDown(event));
 
 		await ac.initializePanel();
 		hideLoading();
@@ -56,8 +51,6 @@ export class ActivityController {
 		const actButton = document.querySelector('#activity-button');
 		const menu = document.querySelector('#activity-menu');
 
-		log('FA');
-		log(window.FontAwesome);
 		const activityClass = ACTIVITIES.get(this.currentActivityName);
 		actButton.textContent = 'Activity: ' + activityClass.label;
 		actButton.addEventListener('click', () => {
@@ -92,22 +85,45 @@ export class ActivityController {
 		this.currentActivity.updateViewers();
 	}
 
+	handleKeyDown(event) {
+		if ((this.mapViewer !== null) && (ARROWS.includes(event.key))) {
+			this.mapViewer.handleKeyDown(event);
+			event.preventDefault();
+			return;
+		}
+
+		if (this.specViewer !== null) {
+			if (event.key === 'ArrowLeft') {
+				this.prevSpec();
+				return; // TODO: handled in spec-viewer
+			} else if (event.key == 'ArrowRight') {
+				this.nextSpec();
+				return; // TODO: handled in spec-viewer
+			}
+		}
+
+		this.currentActivity.handleKeyDown(event);
+	}
+
+	async onMapChange(spaxel) {
+		showLoading();
+		await this.setSpaxelData(spaxel.x, spaxel.y);
+		hideLoading();
+	}
+
 	async setMapData() {
-		log('setMapData');
 		this.currentMap = await getSpecMap(this.currentCatalog.slug, this.currentSpecName, 'median');
+		this.updateMapViewer();
 	}
 
 	async setSpecData() {
-		log('setSpecData');
-		log(this.currentCatalog);
 		this.currentSpec = await getSpecData(this.currentCatalog.slug, this.currentSpecName);
-		log(this.currentSpec);
+		this.updateSpecViewer();
 	}
 
 	async setSpaxelData(x, y) {
-		log('setSpaxelData');
 		this.currentSpec = await getSpaxelData(this.currentCatalog.slug, this.currentSpecName, x, y);
-		log(this.currentSpec);
+		this.updateSpecViewer();
 	}
 
 	async nextSpec() {
@@ -147,20 +163,16 @@ export class ActivityController {
 		this.specViewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.target.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.target.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.target.z.toFixed(4));
 		this.specViewer.setWaveArray(this.currentSpec.wave);
 		this.specViewer.addData(this.currentSpec.flux, this.currentSpec.err);
+		this.specViewer.reloadPlot();
 	}
 
 	updateMapViewer() {
-		log('updateMapViewer');
 		if (!this.mapViewer) { return; }
-		log('updateMapViewer viewer good')
-		// if (!this.currentSpec) { this.mapViewer.setNoDataPlot(); return; }
 		if (!this.currentMap) { this.mapViewer.setNoDataPlot(); return; }
-		log('updateMapViewer map good')
 
 		// this.mapViewer.setTitle(this.currentSpec.name, 'RA: ' + this.currentSpec.target.ra.toFixed(3) + ' | DEC: ' + this.currentSpec.target.dec.toFixed(3) + ' | Redshift: ' + this.currentSpec.target.z.toFixed(4));
-		this.mapViewer.setTitle('SPEC NAME', 'SPEC INFO');
 		this.mapViewer.setData(this.currentMap);
-		log('updateMapViewer data set');
+		this.mapViewer.reloadPlot();
 	}
 }
 
@@ -178,10 +190,9 @@ class Activity {
 
 	initialize() {}
 
-	setupHotKeys() {}
+	handleKeyDown() {}
 
 	updateViewers() {
-		log('updateViewers');
 		this.updateMapViewer();
 		this.updateSpecViewer();
 	}
@@ -200,35 +211,8 @@ class Activity {
 
 class ViewActivity extends Activity {
 	static label = 'View';
-
-	constructor(controller) {
-		super(controller);
-	}
-
-	updateSpecViewer() {
-		super.updateSpecViewer();
-		if (!this.controller.currentSpec) { return; }
-		this.specViewer.reloadPlot();
-	}
-
-	updateMapViewer() {
-		super.updateMapViewer();
-		if (!this.controller.currentMap) { return; }
-		this.mapViewer.addClickHandler((eventData) => this.onMapClick(eventData));
-		this.mapViewer.reloadPlot();
-	}
-
-	async onMapClick(eventData) {
-		log('onMapClick');
-		log(eventData);
-		showLoading();
-		var point = eventData.points[0];
-		log('X = ' + point.x + ', Y = ' + point.y);
-		await this.controller.setSpaxelData(point.x, point.y);
-		this.updateSpecViewer();
-		hideLoading();
-	}
 }
+
 ACTIVITIES.set('view', ViewActivity);
 
 
@@ -243,8 +227,6 @@ class FeatureVerifyActivity extends Activity {
 
 
 	async initialize() {
-		log('feat verify initialize');
-		log(this.controller.currentCatalog);
 		const featSelector = document.querySelector('#feature-selector');
 		const features = this.controller.currentCatalog.data_model.features.lines;
 		for (const feat of features) {
@@ -261,17 +243,10 @@ class FeatureVerifyActivity extends Activity {
 			this.currentFeature = event.target.value;
 			this.updateSpecViewer();
 		});
-
-		document.addEventListener('keydown', (event) => { this.handleKeyDown(event); });
 	}
 
-
 	handleKeyDown(e) {
-		if (e.key === 'ArrowLeft') {
-			this.controller.prevSpec();
-		} else if (e.key == 'ArrowRight') {
-			this.controller.nextSpec();
-		} else if (e.key == '0') {
+		if (e.key == '0') {
 			this.markSpec(0);
 		} else if (e.key == '1') {
 			this.markSpec(1);
@@ -279,7 +254,6 @@ class FeatureVerifyActivity extends Activity {
 			this.markSpec(2);
 		}
 	}
-
 
 	markSpec(value) {
 		sendActivityData({
@@ -293,15 +267,15 @@ class FeatureVerifyActivity extends Activity {
 
 
 	updateSpecViewer() {
-		super.updateSpecViewer();
 		this.specViewer.removeAllFeatures();
 
 		if (this.currentFeature) {
 			this.specViewer.addFeature(this.currentFeature, this.features.get(this.currentFeature));
 		}
 
-		this.specViewer.reloadPlot();
+		super.updateSpecViewer();
 	}
 }
+
 ACTIVITIES.set('feat-verify', FeatureVerifyActivity);
 
