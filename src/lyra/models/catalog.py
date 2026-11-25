@@ -89,13 +89,26 @@ class Catalog(BaseModel):
 	def get_spectra_info(self, spec_name=None):
 		if self._mdf is None:
 			return []
+
 		if spec_name is None:
 			return self._mdf.to_dict(orient='records')
-		res = self._mdf[self._mdf[self.data_model.name_column] == spec_name]
-		if len(res) != 1:
-			print('unexpected result count: %d'%len(res))
-			return []
-		return res.iloc[0].to_dict(orient='records')
+
+		return self.get_spectrum_row(spec_name).to_dict(orient='records')
+
+
+	def get_spectrum_row(self, spec_name):
+		if self._mdf is None:
+			return pd.Series()
+
+		rrow = self._mdf[self._mdf[self.data_model.name_column] == spec_name]
+		if len(rrow) == 0:
+			return pd.Series()
+
+		if len(rrow) != 1:
+			print('unexpected result count: %d'%len(rrow))
+			return pd.Series()
+
+		return rrow.iloc[0]
 
 
 	# TODO: make a separate models/spectrum and models/cube to handle these
@@ -110,7 +123,8 @@ class Catalog(BaseModel):
 			print('Could not find request spectrum: %s'%str(spec_file))
 			return None
 
-		self._spec_cache[spec_name] = load_spectral_product(spec_file, self.data_model.instrument, name=spec_file.stem)
+		z = self.get_spectrum_row(spec_name).get('z', 0.0)
+		self._spec_cache[spec_name] = load_spectral_product(spec_file, self.data_model.instrument, name=spec_file.stem, z=z)
 		return self._spec_cache[spec_name]
 
 
@@ -118,8 +132,8 @@ class Catalog(BaseModel):
 		if self._mdf is None:
 			return None
 
-		idx = self._mdf[self._mdf[self.data_model.name_column] == cur_spec_name].iloc[0].name
-		if idx >= len(self._mdf)-1:
+		idx = self.get_spectrum_row(cur_spec_name).get('name', -1)
+		if idx < 0 or idx >= len(self._mdf)-1:
 			return None
 
 		return self.get_spectrum(self._mdf.iloc[idx+1][self.data_model.name_column])
@@ -129,7 +143,7 @@ class Catalog(BaseModel):
 		if self._mdf is None:
 			return None
 
-		idx = self._mdf[self._mdf[self.data_model.name_column] == cur_spec_name].iloc[0].name
+		idx = self.get_spectrum_row(cur_spec_name).get('name', -1)
 		if idx <= 0:
 			return None
 
@@ -185,7 +199,13 @@ class Catalog(BaseModel):
 		# TODO: better workaround
 		spax.flux = spax.flux.value
 		spax.err = spax.err.value
+		spax.flux[np.isnan(spax.flux)] = 0.0
+		spax.err[np.isnan(spax.err)] = np.nanmedian(spax.err)
 		spax.wave = spax.wave.value
+		# TODO: it takes a long time to serialize
+		# the whole cube, maybe there's a better
+		# way to deal with this
+		spax.cube = None
 		print('returning')
 		return spax
 
