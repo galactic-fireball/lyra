@@ -72,3 +72,47 @@ export class MapViewer {
 
 log('MAP VIEWER JS LOADED');
 registerComponent('map-viewer', () => new MapViewer());
+
+
+let dragging = false;
+function setup_split_adjust() {
+	const container = document.querySelector('.split-container');
+	if (!container) { return; }
+	const mapPanel = document.getElementById('map-viewer');
+	const specPanel = document.getElementById('spectra-viewer');
+	const splitter = document.querySelector('.splitter')
+
+	splitter.addEventListener('mousedown', () => {
+		dragging = true;
+		document.body.style.cursor = 'col-resize';
+	});
+
+	document.addEventListener('mouseup', () => {
+		dragging = false;
+		document.body.style.cursor = '';
+	});
+
+	document.addEventListener('mousemove', (e) => {
+		if (!dragging) { return; }
+		const minWidth = 200;
+		const rect = container.getBoundingClientRect();
+		let mapWidth = e.clientX - rect.left;
+		mapWidth = Math.min(rect.width-minWidth, Math.max(minWidth, mapWidth));
+		const mapPercent = (mapWidth / rect.width) * 100;
+		mapPanel.style.flexBasis = `${mapPercent}%`;
+		specPanel.style.flexBasis = `${100-mapPercent}%`;
+	});
+
+	const observer = new ResizeObserver(entries => {
+		for (const entry of entries) {
+			const plot = entry.target.querySelector('.plotly-container');
+			if (plot) { Plotly.Plots.resize(plot); }
+		}
+	});
+	observer.observe(document.getElementById('map-viewer'));
+	observer.observe(document.getElementById('spectra-viewer'));
+}
+
+setup_split_adjust()
+
+
